@@ -1,0 +1,11 @@
+# 浏览器自动化框架，用于专利检索（知网等网站）的自动化操作和数据抓取
+playwright>=1.62.0
+
+# Word 文档处理库，用于读取 .docx 格式的专利文档内容
+python-docx>=1.1.2
+# PowerPoint 处理库，用于读取 .pptx 格式的演示文稿内容
+python-pptx>=1.0.2
+# PDF 解析库，用于提取 PDF 中的文本和表格内容
+pdfplumber>=0.11.9
+# Windows COM 接口库，用于通过 Windows API 读取旧版 Office 文件（.ppt/.doc）
+pywin32>=306
