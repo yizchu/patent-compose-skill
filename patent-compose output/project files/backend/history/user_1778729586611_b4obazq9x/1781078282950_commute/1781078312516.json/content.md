@@ -1,0 +1,10 @@
+[
+    {
+        "role": "user",
+        "content": "统计一下8月每人迟到天数"
+    },
+    {
+        "role": "assistant",
+        "content": "SELECT u.username, COUNT(*) AS late_days FROM commute.assoc_bk_user_attendance_dd_eagle0922 a JOIN commute.assoc_bk_user u ON a.userid = u.id WHERE a.work_date BETWEEN '2025-08-01' AND '2025-08-31' AND a.is_work_day = 1 AND a.on_duty IS NOT NULL AND a.on_duty > '09:00:00' GROUP BY u.id, u.username ORDER BY late_days DESC"
+    }
+]

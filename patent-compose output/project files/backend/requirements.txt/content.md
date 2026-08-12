@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pymysql
+pymongo
+dbutils
+bidict
+sqlglot
+openai
+urllib3
