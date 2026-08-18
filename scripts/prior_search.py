@@ -276,7 +276,7 @@ class FpoSearch(PriorSearch):
                 time.sleep(RETRY_DELAY*2)
 
 
-def prior_search(project_root: str):
+def prior_search(project_root: str, home_only: bool = True):
     '''
     Parameters:
         out_dir (str): 输出目录
@@ -298,15 +298,24 @@ def prior_search(project_root: str):
     keywords_en = from_json(os.path.join(input_dir, "keyword-en.json"))
 
     cnki_search = CnkiSearch(out_dir)
-    fpo_search = FpoSearch(out_dir)
-
-    # 中英文交替检索
     max_len = max(len(keywords_cn), len(keywords_en))
-    for i in range(max_len):
-        if i < len(keywords_cn):
-            cnki_search.search(keywords_cn[i], 1)
-        if i < len(keywords_en):
-            fpo_search.search(keywords_en[i], 1)
+
+    if not home_only:
+        fpo_search = FpoSearch(out_dir)
+        # 国内外数据库交替检索
+        for i in range(max_len):
+            if i < len(keywords_cn):
+                cnki_search.search(keywords_cn[i])
+            if i < len(keywords_en):
+                fpo_search.search(keywords_en[i])
+    else:
+        # 仅国内数据库检索
+        for i in range(max_len):
+            if i < len(keywords_cn):
+                cnki_search.search(keywords_cn[i], 6)
+            time.sleep(RETRY_DELAY)
+            if i < len(keywords_en):
+                cnki_search.search(keywords_en[i], 6)
 
 
 if __name__ == '__main__':
