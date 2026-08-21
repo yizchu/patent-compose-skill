@@ -71,9 +71,16 @@ class CnkiSearch(PriorSearch):
     def __init__(self, out_dir: str):
         super().__init__(out_dir)
 
-    def search(self, keyword: str, to_page: int = 3):
-        print(f"正在检索: {keyword}")
-        base_url = f"https://kns.cnki.net/res/category/patent"
+    def formula(self, keywords: list) -> str:
+        '''
+        将关键词列表转换为检索式
+        '''
+        return '*'.join(keywords)
+
+    def search(self, keywords: list, to_page: int = 10):
+        print(f"正在检索: {keywords}")
+        keyword = self.formula(keywords)
+        base_url = "https://kns.cnki.net/res/category/patent"
         patents = {}
 
         for attempt in range(MAX_RETRIES):
@@ -90,7 +97,7 @@ class CnkiSearch(PriorSearch):
                 search_button.click()
                 self.page.wait_for_timeout(5000)
 
-                # 按"综合"排序
+                # 按"综合"排序。若无检索内容，这个是找不到的，于是将直接报错退出，恰好不会生成空的json文件
                 zh_sort = self.page.locator('li#ZH')
                 zh_sort.wait_for(state="visible", timeout=10000)
                 zh_sort.click()
@@ -108,7 +115,7 @@ class CnkiSearch(PriorSearch):
                         patent_title = title_link.inner_text()
                         if patent_title in patents:
                             continue
-                        print(f"正在处理: {patent_title}")
+                        #print(f"正在处理: {patent_title}")
 
                         # 监听新标签页打开
                         for _ in range(MAX_RETRIES):
@@ -166,8 +173,15 @@ class FpoSearch(PriorSearch):
     def __init__(self, out_dir: str):
         super().__init__(out_dir)
 
-    def search(self, keyword: str, to_page: int = 2):
-        print(f"正在检索: {keyword}")
+    def formula(self, keywords: list) -> str:
+        '''
+        将关键词列表转换为检索式
+        '''
+        return ' AND '.join(keywords)
+
+    def search(self, keywords: list, to_page: int = 2):
+        print(f"正在检索: {keywords}")
+        keyword = self.formula(keywords)
         base_url = f"https://www.freepatentsonline.com/"
         patents = {}
 
@@ -207,7 +221,7 @@ class FpoSearch(PriorSearch):
                         patent_title = title_link.inner_text()
                         if patent_title in patents:
                             continue
-                        print(f"正在处理: {patent_title}")
+                        #print(f"正在处理: {patent_title}")
 
                         # 在新标签页打开链接
                         for _ in range(MAX_RETRIES):
@@ -221,7 +235,7 @@ class FpoSearch(PriorSearch):
                                 doc2_elements.first.wait_for(state="visible", timeout=120000)
                                 break
                             except:
-                                time.sleep(RETRY_DELAY*2)
+                                time.sleep(RETRY_DELAY)
 
                         abstract_text = ''
                         claim_text = ''
@@ -249,7 +263,7 @@ class FpoSearch(PriorSearch):
                         # 关闭新标签页，回到搜索结果页
                         new_page.close()
                         self.page.wait_for_timeout(1000)
-                        time.sleep(RETRY_DELAY*2)
+                        time.sleep(RETRY_DELAY)
 
                     # 前往下一页
                     next_page_button = self.page.get_by_role("link", name=">")
@@ -263,7 +277,7 @@ class FpoSearch(PriorSearch):
                                 self.page.wait_for_timeout(5000)
                                 break
                             except:
-                                time.sleep(RETRY_DELAY*2)
+                                time.sleep(RETRY_DELAY)
                     else:
                         break
 
@@ -273,10 +287,10 @@ class FpoSearch(PriorSearch):
 
             except Exception as e:
                 #print(f"✗ FPO检索出错: {e}")
-                time.sleep(RETRY_DELAY*2)
+                time.sleep(RETRY_DELAY)
 
 
-def prior_search(project_root: str, home_only: bool = True):
+def prior_search(project_root: str, home_only: bool = False):
     '''
     Parameters:
         out_dir (str): 输出目录
@@ -312,14 +326,15 @@ def prior_search(project_root: str, home_only: bool = True):
         # 仅国内数据库检索
         for i in range(max_len):
             if i < len(keywords_cn):
-                cnki_search.search(keywords_cn[i], 6)
+                cnki_search.search(keywords_cn[i])
             time.sleep(RETRY_DELAY)
             if i < len(keywords_en):
-                cnki_search.search(keywords_en[i], 6)
+                cnki_search.search(keywords_en[i])
 
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser()
     args.add_argument("project_root", type=str, help="项目根目录")
+    args.add_argument("home_only", action="store_false", help="仅检索国内数据库")
     args = args.parse_args()
-    prior_search(args.project_root)
+    prior_search(args.project_root, args.home_only)
