@@ -319,17 +319,24 @@ def prior_search(project_root: str, home_only: bool = False):
         # 国内外数据库交替检索
         for i in range(max_len):
             if i < len(keywords_cn):
-                cnki_search.search(keywords_cn[i])
+                for keywords in keywords_cn[i]:
+                    if cnki_search.search(keywords):
+                        break
             if i < len(keywords_en):
-                fpo_search.search(keywords_en[i])
+                for keywords in keywords_en[i]:
+                    if fpo_search.search(keywords):
+                        break
     else:
         # 仅国内数据库检索
         for i in range(max_len):
             if i < len(keywords_cn):
-                cnki_search.search(keywords_cn[i])
-            time.sleep(RETRY_DELAY)
+                for keywords in keywords_cn[i]:
+                    if cnki_search.search(keywords):
+                        break
             if i < len(keywords_en):
-                cnki_search.search(keywords_en[i])
+                for keywords in keywords_en[i]:
+                    if cnki_search.search(keywords):
+                        break
 
 
 if __name__ == '__main__':
