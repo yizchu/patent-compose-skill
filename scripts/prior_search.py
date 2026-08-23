@@ -1,5 +1,6 @@
 import os
 import sys
+import math
 import time
 import subprocess
 import argparse
@@ -63,6 +64,27 @@ class PriorSearch:
         PriorSearch._init_shared()
         self.page = PriorSearch._shared_context.new_page()
 
+    def split_json(self, file_path: str):
+        '''若一个检索式的检索结果较多，将分多个json文件记录，避免agent因文件过大而无法读取完整文件。'''
+        if not os.path.exists(file_path):
+            return
+        data = from_json(file_path)
+        if not isinstance(data, dict) or len(data) <= 50:
+            return
+        items = list(data.items())
+        base_name = os.path.basename(os.path.splitext(file_path)[0])
+        root = os.path.dirname(file_path)
+        print(len(items))
+        for i in range(0, len(items), 50):
+            chunk = dict(items[i:i+50])
+            chunk_file = os.path.join(root, f"{base_name}_{i//50 + 1}.json")
+            to_json(chunk, chunk_file)
+        # 删除原文件
+        try:
+            os.remove(file_path)
+        except:
+            pass
+
 
 class CnkiSearch(PriorSearch):
     '''
@@ -77,7 +99,7 @@ class CnkiSearch(PriorSearch):
         '''
         return '*'.join(keywords)
 
-    def search(self, keywords: list, to_page: int = 10):
+    def search(self, keywords: list, to_page: int = 8):
         print(f"正在检索: {keywords}")
         keyword = self.formula(keywords)
         base_url = "https://kns.cnki.net/res/category/patent"
@@ -103,7 +125,12 @@ class CnkiSearch(PriorSearch):
                 zh_sort.click()
                 self.page.wait_for_timeout(2000)
 
-                for _page in range(to_page):
+                # 获取总页数
+                total_pages = self.page.locator("span.pagerTitleCell")
+                total_pages.wait_for(state="visible", timeout=10000)
+                total_pages = math.ceil(int(total_pages.inner_text().strip().split()[1]) / 20)
+
+                for _page in range(min(total_pages, to_page)):
                     result_table = self.page.locator("table.result-table-list").locator("tbody")
                     result_table.wait_for(state="visible", timeout=30000)
                     rows = result_table.locator("tr")
@@ -156,8 +183,10 @@ class CnkiSearch(PriorSearch):
                     self.page.keyboard.press("ArrowRight")
                     self.page.wait_for_timeout(5000)
 
-                to_json(patents, os.path.join(self.out_dir,
-                                    clean_filename(keyword)+".json"))
+                json_path = os.path.join(self.out_dir, clean_filename(keyword)+".json")
+                to_json(patents, json_path)
+                self.split_json(json_path)
+
                 print(f"✓ Cnki检索成功: {keyword}")
                 return True
 
@@ -209,7 +238,11 @@ class FpoSearch(PriorSearch):
                 search_button.click()
                 self.page.wait_for_timeout(10000)
 
-                for _page in range(to_page):
+                matches_element = self.page.locator("td", has_text="Matches")
+                matches_element.first.wait_for(state="visible", timeout=10000)
+                total_pages = math.ceil(int(matches_element.first.inner_text().strip().split()[-1]) / 50)
+
+                for _page in range(min(total_pages, to_page)):
                     result_table = self.page.locator("table.listing_table").locator("tbody")
                     result_table.wait_for(state="visible", timeout=30000)
                     rows = result_table.locator("tr")
@@ -281,7 +314,10 @@ class FpoSearch(PriorSearch):
                     else:
                         break
 
-                to_json(patents, os.path.join(self.out_dir, clean_filename(keyword) + ".json"))
+                json_path = os.path.join(self.out_dir, clean_filename(keyword) + f".json")
+                to_json(patents, json_path)
+                self.split_json(json_path)
+
                 print(f"✓ FPO检索成功: {keyword}")
                 return True
 
@@ -338,8 +374,11 @@ def prior_search(project_root: str, home_only: bool = False):
                     if cnki_search.search(keywords):
                         break
 
+    print("√ Done.")
+
 
 if __name__ == '__main__':
+    prior_search("C:\\Users\\chenz\\.marscode\\skills\\patent-compose-skill\\patent-compose output")
     args = argparse.ArgumentParser()
     args.add_argument("project_root", type=str, help="项目根目录")
     args.add_argument("home_only", action="store_false", help="仅检索国内数据库")
