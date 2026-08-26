@@ -1,6 +1,7 @@
 import os
 import json
 import base64
+from pathlib import Path
 from pptx import Presentation
 from docx import Document
 import fitz
@@ -53,7 +54,7 @@ class FileReader:
         """读取文件的文本内容"""
         if self.extension in {'pptx', 'ppt', 'pptm'}:
             return self.get_ppt_text()
-        elif self.extension in {'docx', 'doc', 'docm'}:
+        elif self.extension in {'docx', 'doc', 'docm'} and self._zip_within_caps():
             return self.get_word_text()
         elif self.extension in {'pdf'}:
             return self.get_pdf_text()
@@ -75,12 +76,46 @@ class FileReader:
         """提取文件中的图片"""
         if self.extension in {'pptx', 'ppt', 'pptm'}:
             return self.get_ppt_image()
-        elif self.extension in {'docx', 'doc', 'docm'}:
+        elif self.extension in {'docx', 'doc', 'docm'} and self._zip_within_caps():
             return self.get_word_image()
         elif self.extension in {'pdf'}:
             return self.get_pdf_image()
         elif self.extension in {'ipynb'}:
             return self.get_jupyter_image()
+
+    def _zip_within_caps(self) -> bool:
+        """过滤掉过大的基于 zip 的 Office 文件。
+        """
+        path = Path(self.file_path)
+
+        try:
+            if path.stat().st_size > 50 * 1024 * 1024:
+                return False
+        except OSError:
+            return False
+
+        try:
+            with zipfile.ZipFile(path) as zf:
+                infos = zf.infolist()
+                compressed = sum(i.compress_size for i in infos) or 1
+                declared = sum(i.file_size for i in infos)
+                if declared > 512 * 1024 * 1024:
+                    return False
+                if declared / compressed > 200:
+                    return False
+                total = 0
+                for info in infos:
+                    with zf.open(info) as member:
+                        while True:
+                            chunk = member.read(1024 * 1024)
+                            if not chunk:
+                                break
+                            total += len(chunk)
+                            if total > 512 * 1024 * 1024:
+                                return False
+        except (zipfile.BadZipFile, OSError, EOFError):
+            return False
+        return True
 
     def get_ppt_text(self) -> str:
         text_output = []

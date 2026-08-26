@@ -71,15 +71,6 @@ SKIP_DIRS = {
  # 大概率有用的文件扩展名
 # 大概率有用的文件
 READ_EXTENSIONS = {
-    # ========== 代码文件（直接读取） ==========
-#    '.py', '.java', '.js', '.ts', '.jsx', '.tsx', '.go', '.cpp', '.c', '.h', '.hpp',
-#    '.cs', '.rb', '.php', '.swift', '.kt', '.kts', '.scala', '.rs', '.sh', '.bash',
-#    '.zsh', '.fish', '.sql', '.r', '.m', '.pl', '.lua', '.dart', '.vue', '.svelte',
-#    '.asm', '.s', '.clj', '.cljs', '.erl', '.hrl', '.ex', '.exs', '.hs', '.ml',
-#    '.mli', '.pas', '.pp', '.groovy', '.gradle', '.tf', '.hcl', '.cmake', '.make',
-#    '.mk', '.dockerfile', '.css', '.xml', '.html', '.htm', '.xhtml', '.scss', '.sass',
-#    '.less', '.styl',
-
     # ========== 标记语言（直接读取） ==========
     '.md', '.markdown', '.rst', '.adoc', '.asciidoc', '.tex', '.latex', '.wiki',
     '.org', '.textile',
@@ -101,6 +92,17 @@ READ_EXTENSIONS = {
     # ========== 图片文件 ==========
 #    '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp', '.tiff', '.tif',
 #    '.svg', '.ico', '.avif', '.heic', '.heif',
+}
+CODE_EXTENSIONS = {
+    '.py', '.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs', '.ejs', '.ets',
+    '.go', '.rs', '.java', '.groovy', '.gradle', '.cpp', '.cc', '.cxx', '.c', '.h', '.hpp',
+    '.cu', '.cuh', '.metal', '.rb', '.rake', '.swift', '.kt', '.kts', '.cs', '.scala', '.php',
+    '.lua', '.luau', '.toc', '.zig', '.ex', '.exs', '.m', '.mm', '.asd',
+    '.ml', '.mli', '.jl', '.vue', '.svelte', '.astro', '.dart', '.v', '.sv', '.svh', '.sql',
+    '.r', '.f', '.F', '.f90', '.F90', '.f95', '.F95', '.f03', '.F03', '.f08', '.F08', '.pas',
+    '.pp', '.dpr', '.dpk', '.lpr', '.inc', '.dfm', '.lfm', '.lpk', '.sh', '.bash',
+    '.tf', '.tfvars', '.hcl', '.dm', '.dme', '.dmi', '.dmm', '.dmf', '.sln', '.slnx', '.csproj',
+    '.fsproj', '.vbproj', '.xaml', '.razor', '.cshtml', '.cls', '.trigger', '.lisp', '.cl', '.lsp',
 }
 
 def get_files_info(project_root: str, dir_path: str):
