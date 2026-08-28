@@ -378,7 +378,6 @@ def prior_search(project_root: str, home_only: bool = False):
 
 
 if __name__ == '__main__':
-    prior_search("C:\\Users\\chenz\\.marscode\\skills\\patent-compose-skill\\patent-compose output")
     args = argparse.ArgumentParser()
     args.add_argument("project_root", type=str, help="项目根目录")
     args.add_argument("home_only", action="store_false", help="仅检索国内数据库")
