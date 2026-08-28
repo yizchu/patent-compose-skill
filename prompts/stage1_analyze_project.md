@@ -36,8 +36,17 @@ python "${SKILL_DIR}/scripts/analyze_project.py" get_files_info <项目根目录
 **`Read`** `${输出目录}/materials/disclosure-v1.md`，将本次图片分析结果与之整合，覆盖 `${输出目录}/materials/disclosure-v1.md` 文件。
 
 ### Step 4：项目代码分析（如果有代码文件的话）
-1. **对核心代码文件进行深度分析**
-遍历 `${输出目录}` 目录下的所有文件夹（`patent-compose output`目录除外），分析所有的代码文件（如'.py', '.java', '.js'等），关注的内容需依项目领域灵活识别，包括但不限于：
+1. **安全检测**
+执行以下命令进行代码敏感信息扫描：
+```bash
+python "${SKILL_DIR}/scripts/analyze_project.py" examine_code_file <项目根目录>
+```
+等待命令执行完成，仔细阅读输出的检测报告。若检测到敏感信息（如 API 密钥、密码、Token、数据库连接串等），**必须**向用户明确列出。**暂停后续步骤**，等待用户回复确认再继续。
+
+2. **对核心代码文件进行深度分析**
+遍历 `${输出目录}` 目录下的所有文件夹（`patent-compose output`目录除外），分析所有的代码文件。代码文件范围仅限于 `${SKILL_DIR}/scripts/analyze_project.py` 中 `CODE_EXTENSIONS` 常量定义的后缀文件，**严禁读取**该常量之外的任何文件类型。
+
+分析时需依项目领域灵活识别以下关注点（包括但不限于）：
 - 核心算法与策略实现
 - 业务逻辑与流程编排
 - 数据处理与转换
@@ -46,7 +55,8 @@ python "${SKILL_DIR}/scripts/analyze_project.py" get_files_info <项目根目录
 - 状态机与调度机制
 - 性能优化与缓存策略
 - 安全与权限控制
-2. **保存分析结果**
+
+3. **保存分析结果**
 **`Read`** `${输出目录}/materials/disclosure-v1.md`，将本次代码分析结果与之整合，覆盖 `${输出目录}/materials/disclosure-v1.md` 文件。
 
 **提示**：
