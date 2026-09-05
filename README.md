@@ -7,6 +7,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Skill-blueviolet)](https://claude.com/product/claude-code)
+[![Patent](https://img.shields.io/badge/Patent-IP%20Protection-red.svg)]()
+[![AI Powered](https://img.shields.io/badge/AI-Powered-green.svg)]()
 
 <br>
 
