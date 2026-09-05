@@ -531,7 +531,7 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 
 </table>
 
-> **💡 展示的所有运行效果均基于 https://github.com/yizchu/DBAgent 真实案例生成。
+> 💡 展示的所有运行效果均基于 https://github.com/yizchu/DBAgent 真实案例生成。
 
 ---
 
