@@ -9,3 +9,5 @@ python-pptx>=1.0.2
 pdfplumber>=0.11.9
 # Windows COM 接口库，用于通过 Windows API 读取旧版 Office 文件（.ppt/.doc）
 pywin32>=306
+# json自动修复库，用于修复 JSON 格式错误
+json-repair

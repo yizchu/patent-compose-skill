@@ -1,13 +1,13 @@
 ---
 name: patent-compose-skill
-description: AI-powered patent drafting workflow automating project analysis, prior art search, disclosure generation, and claims writing.
+description: AI驱动的专利撰写工作流，自动化完成项目分析、查新检索、专利组合生成与优化、交底书和流程图撰写。
 user-invocable: true
-allowed-tools: Read, Write, Edit, Grep, Glob, WebSearch, Bash
+allowed-tools: Read, Write, Edit, Grep, Glob, WebSearch, RunCommand
 ---
 
 ## 概述
 
-本 Skill 用于辅助完成专利撰写全流程，包含四个阶段：分析项目生成权利要求树、项目成果查新、生成最终交底书、撰写权利要求书并绘制流程图。
+本 Skill 用于辅助完成专利撰写全流程，包含四个阶段：项目分析、查新、专利组合生成与对抗优化、交底书与流程图撰写。
 
 ## 核心原则
 - **固定输出目录**：专利项目根目录下的 `patent-compose output`。不要默认写到其他任何目录。
@@ -18,73 +18,84 @@ allowed-tools: Read, Write, Edit, Grep, Glob, WebSearch, Bash
 
 ## 工作流程
 
-本 Skill 按顺序执行四个阶段，每个阶段完成后需经用户确认方可进入下一阶段。
+### Stage 1: 项目分析 → 权利要求树
 
-### Stage 1: 分析项目，初步生成"权利要求树"
+**`Read`** `${SKILL_DIR}/prompts/stage1_analyze_project.md`
 
-**`Read`** `${SKILL_DIR}/prompts/stage1_analyze_project.md`，按其中的提示词执行。
+**功能**：分析项目源码和文档，提取核心技术方案并生成初始权利要求树
 
-**输出文件**：
-- `${输出目录}/materials/disclosure-v1.md` - 初始交底书
-- `${输出目录}/materials/claim-tree-v1.json` - 初始权利要求树
+**输出**：
+- `materials/disclosure-v1.md` - 第一版技术交底书，是项目的分析结果
+- `materials/claim-tree-v1.json` - 初始权利要求树
 
 ### Stage 2: 项目成果查新
 
-**`Read`** `${SKILL_DIR}/prompts/stage2_prior_search.md`，按其中的提示词执行。
+**`Read`** `${SKILL_DIR}/prompts/stage2_prior_search.md`
 
-**重要说明**：执行数据库检索脚本时，启动后应立即退出当前执行，不要等待完成，向用户提示后等待确认再继续。
+**功能**：基于关键词进行专利数据库检索，评估技术方案的新颖性和创造性
 
-**输出文件**：
-- `${输出目录}/materials/keyword-cn.json` - 中文检索词
-- `${输出目录}/materials/keyword-en.json` - 英文检索词
-- `${输出目录}/materials/prior-art.md` - 检索结果汇总
-- `${输出目录}/materials/prior-art-report.md` - 查新报告
+⚠️ 执行数据库检索脚本后需等待用户确认
 
-### Stage 3: 生成最终交底书
+**输出**：
+- `materials/keyword-cn.json` - 中文检索词
+- `materials/keyword-en.json` - 英文检索词
+- `materials/prior-art.md` - 和项目相关的现有技术清单
+- `materials/prior-art-report.md` - 查新分析报告
 
-**`Read`** `${SKILL_DIR}/prompts/stage3_generate_disclosure.md`，按其中的提示词执行。
+### Stage 3: 专利组合生成与权利要求树优化（含六轮博弈对抗）
 
-**输出文件**：
-- `${输出目录}/materials/disclosure-v2.md` - 最终交底书
-- `${输出目录}/materials/claim-tree-v2.json` - 最终权利要求树
+**`Read`** `${SKILL_DIR}/prompts/stage3_generate_claim.md`
 
-### Stage 4: 撰写权利要求书，绘制核心技术流程图
+**功能**：布局专利组合，并通过六轮博弈对抗优化
 
-**`Read`** `${SKILL_DIR}/prompts/stage4_generate_claim.md`，按其中的提示词执行。
+**输出**：
+- `materials/portfolio-initial.json` - 初始专利组合方案
+- `materials/portfolio-v2.json` - 最终专利组合方案
+- `claim-optimization/` - 六轮攻防记录（R1-R6.json）+ HTML 可视化报告
 
-**输出文件**：
-- `${输出目录}/materials/claims.md` - 权利要求书
-- `${输出目录}/materials/abstract.md` - 专利摘要
-- `${输出目录}/materials/flowcharts.md` - 核心技术流程图
+### Stage 4: 撰写最终交底书与流程图
+
+**`Read`** `${SKILL_DIR}/prompts/stage4_generate_disclosure.md`
+
+**功能**：为每件专利撰写完整的技术交底书（融合查新成果）并绘制 Mermaid 流程图
+
+**输出**：
+- `patents/disclosure_{专利标题}.md` - 各专利独立交底书（最终版）
+- `patents/flowcharts_{专利标题}.md` - 各专利流程图
+- `materials/disclosure-v2.md` - 汇总版最终交底书
+- `materials/flowcharts.md` - 汇总版流程图
 
 ## 输出目录结构
 
 ```
 patent-compose output/
-├── materials/
-│   ├── disclosure-v1.md          # 初始交底书
-│   ├── disclosure-v2.md          # 最终交底书
-│   ├── claim-tree-v1.json        # 初始权利要求树
-│   ├── claim-tree-v2.json        # 最终权利要求树
-│   ├── claims.md                 # 权利要求书
-│   ├── abstract.md               # 专利摘要
-│   ├── flowcharts.md             # 核心技术流程图
-│   ├── keyword-cn.json           # 中文检索词
-│   ├── keyword-en.json           # 英文检索词
-│   ├── prior-art.md              # 检索结果汇总
-│   └── prior-art-report.md       # 查新报告
-├── prior art/
-│   ├── <检索词>.json              # 各检索词的专利检索结果
-│   └── WebSearch-results.md      # 网络检索结果
-└── project files/                 # 项目文件镜像结构及分析结果
-    └── files_info.json            # 项目文件信息树
+├── materials/                          # 汇总版文件（Stage 1-4）
+│   ├── disclosure-v1.md               # Stage 1: 原始技术交底书
+│   ├── claim-tree-v1.json             # Stage 1: 初始权利要求树
+│   ├── keyword-cn.json                # Stage 2: 中文检索词
+│   ├── keyword-en.json                # Stage 2: 英文检索词
+│   ├── prior-art.md                   # Stage 2: 现有技术清单
+│   ├── prior-art-report.md            # Stage 2: 查新分析报告
+│   ├── portfolio-initial.json         # Stage 3: 初始专利组合方案
+│   ├── portfolio-v2.json             # Stage 3: 最终优化后的专利组合
+│   ├── disclosure-v2.md               # Stage 4: 汇总版最终交底书
+│   └── flowcharts.md                  # Stage 4: 汇总版流程图
+├── claim-optimization/                 # Stage 3: 博弈对抗记录
+│   ├── R1.json ~ R6.json              # 六轮攻防详情
+│   └── claim-optimization.html        # 优化过程报告
+├── patents/                            # Stage 4: 各专利独立文件
+│   ├── disclosure_{专利标题}.md        # 各专利独立交底书
+│   └── flowcharts_{专利标题}.md        # 各专利流程图
+└── prior art/                         # 查新检索结果
+└── project files/                     # 项目文件产物
 ```
 
-## 脚本说明
+## 脚本工具
 
-| 脚本文件 | 功能 | 调用方式 |
-|---------|------|---------|
-| `scripts/analyze_project.py` | 分析项目文件结构，提取文件信息 | `python analyze_project.py get_files_info <项目根目录> <项目根目录>` |
-| `scripts/prior_search.py` | 专利数据库检索 | `python prior_search.py <项目根目录>` |
-| `scripts/config.py` | 配置输出目录常量 | 被其他脚本导入使用 |
-| `scripts/file_tools.py` | 文件读写工具函数 | 被其他脚本导入使用 |
+| 脚本 | 功能 | 用途 |
+|------|------|------|
+| `analyze_project.py` | 项目源码和文档分析，提取技术方案 | Stage 1 |
+| `prior_search.py` | 专利数据库检索与查新分析 | Stage 2 |
+| `generate_optimization_html.py` | 六轮博弈对抗优化报告生成 | Stage 3 |
+| `file_tools.py` | 文件读写、JSON 格式验证与自动修复 | 通用工具 |
+| `config.py` | 全局配置（输出目录等） | 通用配置 |
