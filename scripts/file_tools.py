@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import re
 import base64
@@ -10,6 +11,7 @@ import pdfplumber
 import win32com.client
 import pythoncom
 import zipfile
+from json_repair import repair_json
 
 CREDENTIAL_STORE_DIRS = frozenset({
     ".ssh", ".gnupg", ".aws", ".gcloud", "secrets", ".secrets", "credentials",
@@ -196,9 +198,17 @@ def to_json(data: dict, file_path: str):
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-def from_json(file_path: str):
-    with open(file_path, 'r', encoding='utf-8') as f:
-        return json.load(f)
+def from_json(file_path: str) -> dict:
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            good_json: dict = json.load(f)
+            print(f"成功加载 {file_path}")
+    except json.JSONDecodeError:
+        good_json = repair_json(open(file_path, 'r', encoding='utf-8').read())
+        good_json: dict = json.loads(good_json)
+        to_json(good_json, file_path)
+        print(f"成功修复 {file_path}")
+    return good_json
 
 def clean_filename(filename: str) -> str:
     """清理文件名中的无效字符，返回安全的文件名。 \n
@@ -571,3 +581,32 @@ class FileReader:
                                     f.write(jpeg_data)
         except:
             pass
+
+
+def cli_from_json():
+    """命令行接口：JSON文件验证和自动修复工具"""
+    if len(sys.argv) != 3 or sys.argv[1] != 'from_json':
+        print("用法: python file_tools.py from_json <file_path>")
+        sys.exit(1)
+
+    file_path = sys.argv[2]
+
+    try:
+        from_json(file_path)
+    except FileNotFoundError:
+        print(f"❌ 文件不存在: {file_path}", file=sys.stderr)
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"❌ JSON格式无效且无法修复: {e}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"❌ 错误: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1] == 'from_json':
+        cli_from_json()
+    else:
+        print("用法: python file_tools.py from_json <file_path>")
+        sys.exit(1)

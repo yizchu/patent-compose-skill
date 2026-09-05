@@ -55,6 +55,8 @@ class PriorSearch:
         self.context = None
         self.page = None
         self.kw_group = []
+        self.patents = {}
+        self.keyword = None
 
     async def _init_page(self):
         await PriorSearch._init_shared()
@@ -76,12 +78,18 @@ class PriorSearch:
         ...
 
     async def search_round(self, kw_group):
+        self.patents = {}
         self.kw_group = kw_group
         for keywords in kw_group:
             if await self.search(keywords):
                 break
+        if len(self.patents) > 0:
+            json_path = os.path.join(self.out_dir, clean_filename(self.keyword) + f".json")
+            to_json(self.patents, json_path)
+            await self.split_json(json_path)
+            print(f"✓ 检索成功: {self.keyword}")
 
-    def split_json(self, file_path: str):
+    async def split_json(self, file_path: str):
         if not os.path.exists(file_path):
             return
         data = from_json(file_path)
@@ -101,32 +109,39 @@ class PriorSearch:
 
 
 class CnkiSearch(PriorSearch):
-    def __init__(self, out_dir: str):
-        super().__init__(out_dir)
-        self.flag = 0
-        self.patents = {}
 
     def formula(self, keywords: list) -> str:
         return '*'.join(keywords)
 
-    async def search(self, keywords: list, to_page: int = 8):
+    async def search(self, keywords: list, to_page: int = 6):
         print(f"正在检索: {keywords}")
-        keyword = self.formula(keywords)
+        self.keyword = self.formula(keywords)
         base_url = "https://kns.cnki.net/res/category/patent"
 
         for attempt in range(MAX_RETRIES):
             try:
                 await self.page.goto(base_url, wait_until="load", timeout=30000)
                 await self.page.wait_for_timeout(3000)
-
-                input_box = self.page.locator("input[data-v-703e12f2]")
+                # 输入框的data-v属性值可能失效，需要不定期更新
+                input_box = self.page.locator("input[data-v-6b55a10e]")
                 await input_box.wait_for(state="visible", timeout=10000)
-                await input_box.fill(keyword)
+                await input_box.fill(self.keyword)
 
                 search_button = self.page.locator(".btn-search")
                 await search_button.wait_for(state="visible", timeout=10000)
                 await search_button.click()
                 await self.page.wait_for_timeout(5000)
+
+                try:
+                    no_data = self.page.locator("p.no-content")
+                    await no_data.wait_for(state="visible", timeout=10000)
+                    no_data_text = await no_data.inner_text()
+                    if "暂无数据" in no_data_text:
+                        print("× Cnki检索数量不足")
+                        await asyncio.sleep(RETRY_DELAY)
+                        return False
+                except Exception:
+                    pass
 
                 zh_sort = self.page.locator('li#ZH')
                 await zh_sort.wait_for(state="visible", timeout=10000)
@@ -146,14 +161,14 @@ class CnkiSearch(PriorSearch):
                     for idx in range(await rows.count()):
                         row = rows.nth(idx)
                         title_link = row.locator("a.fz14")
-                        patent_title = await title_link.inner_text()
+                        patent_title = (await title_link.inner_text()).strip().lower()
                         if patent_title in self.patents:
                             continue
 
                         new_page = None
                         for _ in range(MAX_RETRIES):
                             try:
-                                async with self.context.expect_page() as page_info:
+                                async with self.context.expect_page(timeout=10000) as page_info:
                                     await title_link.click()
                                 new_page = await page_info.value
                                 await new_page.wait_for_load_state("load", timeout=15000)
@@ -191,22 +206,17 @@ class CnkiSearch(PriorSearch):
                     await self.page.wait_for_timeout(5000)
 
                 if len(self.patents) >= (to_page >> 1) * 20:
-                    self.flag = 1
-
-                if self.flag or self.kw_group[-1] == keywords:
-                    json_path = os.path.join(self.out_dir, clean_filename(keyword)+".json")
-                    to_json(self.patents, json_path)
-                    self.split_json(json_path)
-                    print(f"✓ Cnki检索成功: {keyword}")
                     return True
                 else:
-                    raise Exception("× Cnki检索数量不足")
+                    print("× Cnki检索数量不足")
+                    await asyncio.sleep(RETRY_DELAY)
+                    return False
 
             except Exception as e:
                 print(f"× Cnki检索失败: {e}")
                 await asyncio.sleep(RETRY_DELAY)
 
-            return False
+        return False
 
 
 class FpoSearch(PriorSearch):
@@ -214,11 +224,10 @@ class FpoSearch(PriorSearch):
     def formula(self, keywords: list) -> str:
         return ' AND '.join(keywords)
 
-    async def search(self, keywords: list, to_page: int = 2):
+    async def search(self, keywords: list, to_page: int = 1):
         print(f"正在检索: {keywords}")
-        keyword = self.formula(keywords)
+        self.keyword = self.formula(keywords)
         base_url = f"https://www.freepatentsonline.com/"
-        patents = {}
 
         for attempt in range(MAX_RETRIES):
             try:
@@ -229,7 +238,7 @@ class FpoSearch(PriorSearch):
 
                 input_box = self.page.locator("input#topSearchBox")
                 await input_box.wait_for(state="visible", timeout=10000)
-                await input_box.fill(keyword)
+                await input_box.fill(self.keyword)
 
                 other_box = self.page.locator("input#patents_other")
                 await other_box.wait_for(state="visible", timeout=10000)
@@ -253,15 +262,16 @@ class FpoSearch(PriorSearch):
                     for idx in range(1, await rows.count()):
                         row = rows.nth(idx)
                         title_link = row.locator("a")
-                        patent_title = await title_link.inner_text()
-                        if patent_title in patents:
+                        patent_title = (await title_link.inner_text()).strip().lower()
+                        if patent_title in self.patents:
                             continue
 
+                        #print(f"正在处理: {patent_title}")
                         new_page = None
                         doc2_elements = None
                         for _ in range(MAX_RETRIES):
                             try:
-                                async with self.context.expect_page() as page_info:
+                                async with self.context.expect_page(timeout=15000) as page_info:
                                     await title_link.click(modifiers=["Control"])
 
                                 new_page = await page_info.value
@@ -293,7 +303,7 @@ class FpoSearch(PriorSearch):
                                         claim_text = (await claim_elm.inner_text()).strip()
                                     break
 
-                        patents[patent_title] = {
+                        self.patents[patent_title] = {
                             "claim": claim_text,
                             "abstract": abstract_text
                         }
@@ -317,18 +327,13 @@ class FpoSearch(PriorSearch):
                     else:
                         break
 
-                json_path = os.path.join(self.out_dir, clean_filename(keyword) + f".json")
-                to_json(patents, json_path)
-                self.split_json(json_path)
-
-                print(f"✓ FPO检索成功: {keyword}")
                 return True
 
             except Exception as e:
                 print(f"× FPO检索失败: {e}")
                 await asyncio.sleep(RETRY_DELAY)
 
-            return False
+        return False
 
 
 async def prior_search(project_root: str, home_only: bool = False):
@@ -384,4 +389,7 @@ if __name__ == '__main__':
     args.add_argument("project_root", type=str, help="项目根目录")
     args.add_argument("--home_only", action="store_true", help="仅检索国内数据库")
     args = args.parse_args()
-    asyncio.run(prior_search(args.project_root, args.home_only))
+    try:
+        asyncio.run(prior_search(args.project_root, args.home_only))
+    except Exception:
+        sys.exit(0)
