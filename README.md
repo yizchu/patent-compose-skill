@@ -560,7 +560,7 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 - [开发计划与进度](TODO.md)
 - [Stage 1: 项目分析](prompts/stage1_analyze_project.md)
 - [Stage 2: 查新检索](prompts/stage2_prior_search.md)
-- [Stage 3: 专利布局](prompts/stage3_generate_claim.md)
+- [Stage 3: 专利布局](prompts/stage3_design_portofolio.md)
 - [Stage 4: 文档生成](prompts/stage4_generate_disclosure.md)
 
 ---

@@ -42,9 +42,9 @@ allowed-tools: Read, Write, Edit, Grep, Glob, WebSearch, RunCommand
 - `materials/prior-art.md` - 和项目相关的现有技术清单
 - `materials/prior-art-report.md` - 查新分析报告
 
-### Stage 3: 专利组合生成与权利要求树优化（含六轮博弈对抗）
+### Stage 3: 专利组合生成与权利要求树优化
 
-**`Read`** `${SKILL_DIR}/prompts/stage3_generate_claim.md`
+**`Read`** `${SKILL_DIR}/prompts/stage3_design_portofolio.md`
 
 **功能**：布局专利组合，并通过六轮博弈对抗优化
 
