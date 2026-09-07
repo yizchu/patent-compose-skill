@@ -7,7 +7,7 @@ allowed-tools: Read, Write, Edit, Grep, Glob, WebSearch, RunCommand
 
 ## 概述
 
-本 Skill 用于辅助完成专利撰写全流程，包含四个阶段：项目分析、查新、专利组合生成与对抗优化、交底书与流程图撰写。
+本 Skill 用于辅助完成专利撰写全流程，包含五个阶段：项目分析、查新、专利组合生成与对抗优化、交底书与流程图撰写、权利要求书生成。
 
 ## 核心原则
 - **固定输出目录**：专利项目根目录下的 `patent-compose output`。不要默认写到其他任何目录。
@@ -65,6 +65,15 @@ allowed-tools: Read, Write, Edit, Grep, Glob, WebSearch, RunCommand
 - `materials/disclosure-v2.md` - 汇总版最终交底书
 - `materials/flowcharts.md` - 汇总版流程图
 
+### Stage 5: 撰写权利要求书
+
+**`Read`** `${SKILL_DIR}/prompts/stage5_compose_claim.md`
+
+**功能**：自动生成每个专利的权利要求书并进行质量检查
+
+**输出**：
+- `patents/claims_{专利标题}.md` - 各专利独立的权利要求书文件
+
 ## 输出目录结构
 
 ```
@@ -83,10 +92,11 @@ patent-compose output/
 ├── claim-optimization/                 # Stage 3: 博弈对抗记录
 │   ├── R1.json ~ R6.json              # 六轮攻防详情
 │   └── claim-optimization.html        # 优化过程报告
-├── patents/                            # Stage 4: 各专利独立文件
-│   ├── disclosure_{专利标题}.md        # 各专利独立交底书
-│   └── flowcharts_{专利标题}.md        # 各专利流程图
-└── prior art/                         # 查新检索结果
+├── patents/                            # Stage 4-5: 各专利独立文件
+│   ├── disclosure_{专利标题}.md        # Stage 4: 各专利独立交底书
+│   ├── flowcharts_{专利标题}.md        # Stage 4: 各专利流程图
+│   └── claims_{专利标题}.md           # Stage 5: 各专利权利要求书
+├── prior art/                         # 查新检索结果
 └── project files/                     # 项目文件产物
 ```
 
@@ -97,5 +107,6 @@ patent-compose output/
 | `analyze_project.py` | 项目源码和文档分析，提取技术方案 | Stage 1 |
 | `prior_search.py` | 专利数据库检索与查新分析 | Stage 2 |
 | `generate_optimization_html.py` | 六轮博弈对抗优化报告生成 | Stage 3 |
+| `claim.py` | 权利要求树转权利要求书文本 | Stage 5 |
 | `file_tools.py` | 文件读写、JSON 格式验证与自动修复 | 通用工具 |
 | `config.py` | 全局配置（输出目录等） | 通用配置 |

@@ -105,7 +105,7 @@ python "${SKILL_DIR}/scripts/file_tools.py" from_json "${输出目录}/materials
 
 将 Step 2 生成的初始专利组合方案保存到```${输出目录}/materials/portfolio-initial.json```。
 
-**结构模板**：
+**严格遵循结构模板**：
 
 ```json
 {
@@ -134,7 +134,7 @@ python "${SKILL_DIR}/scripts/file_tools.py" from_json "${输出目录}/materials
         "来自v1的独权名称1": {
           "description": "直接引用v1的描述...",
           "contains": { ... },
-          "special_claims": ["..."]
+          "special claims": ["..."]
         },
         "来自v1的独权名称2": {
           "description": "直接引用v1的描述...",
@@ -142,9 +142,7 @@ python "${SKILL_DIR}/scripts/file_tools.py" from_json "${输出目录}/materials
         }
       },
 
-      "independent_claims_count": 2,
       "shared_technical_features": "多个独权时的共同技术特征",
-      "key_differences": ["区别技术特征1", "区别技术特征2"]
     },
     // 若分多件专利，继续添加类似结构
     {
@@ -159,23 +157,25 @@ python "${SKILL_DIR}/scripts/file_tools.py" from_json "${输出目录}/materials
         "来自v1的独权名称3": {
           "description": "直接引用v1的描述...",
           "contains": { ... },
-          "special_claims": ["..."]
+          "special claims": ["..."]
         }
       },
 
-      "independent_claims_count": 1,
-      "shared_technical_features": null,
-      "key_differences": ["区别技术特征3"]
+      "shared_technical_features": null
     }
   ]
 }
 ```
 
-#### 2.5 验证 JSON 格式
+#### 2.5 格式验证
 
+生成权利要求树后，必须执行以下命令检查权利要求树的格式是否符合规范：
 ```bash
-python "${SKILL_DIR}/scripts/file_tools.py" from_json "${输出目录}/materials/portfolio-initial.json"
+python "${SKILL_DIR}/scripts/claim.py" tree_to_claims "${输出目录}/materials/claim-tree-v1.json"
 ```
+若程序报错，需在保持权利要求树内容不变的情况下调整其结构，再执行上述检查命令，**循环此过程直到权利要求树格式符合核心原则为止**。
+
+**验证后必须 Read 文件检查内容！** 即使命令无报错，也要确认自动修复（如有）没有改变原始意图。验证和检查不通过不能继续 Step 3！
 
 ---
 
@@ -527,27 +527,17 @@ python "${SKILL_DIR}/scripts/generate_optimization_html.py" <项目根目录>
 将 Step 3 优化后的权利要求树保存至 `${输出目录}/materials/portfolio-v2.json`
 
 **核心原则**：
-- **保持树形结构**：格式与 `claim-tree-v1.json` 完全一致（独立权利要求名称为键，包含 `description`、`contains`、`special_claims`）
+- **保持树形结构**：格式与 `claim-tree-v1.json` 完全一致（独立权利要求名称为键，包含 `description`、`contains`、`special claims`）
 - **界定专利归属**：`independent_claims` 明确列出该专利包含的独立权利要求（来自 v1 的最浅层键），每个 `claim_tree` 只包含属于该专利的权利要求
 - **简洁标注优化**：只在优化过的部分前标注【优化后】，不记录详细的优化过程
 - **记录封堵成果**：`evasion_paths_blocked` 填充 Step 3 中成功封堵的规避路径列表
 
-**结构模板**：
+**严格遵循结构模板**：
 
 ```json
 {
   "project_name": "[项目名称]",
   "generation_date": "2026-09-02",
-  "portfolio_summary": {
-    "patent_count": N,
-    "strategy_description": "一句话描述拆分策略，例如：将项目拆分为3件发明专利，分别保护知识图谱构建、隐式外键发现和SQL查询溯源三个独立发明点",
-    "trade_secrets": [
-      {
-        "content": "建议作为商业秘密保护的技术内容",
-        "reason": "为什么不适合申请专利"
-      }
-    ]
-  },
 
   "patents": [
     {
@@ -564,7 +554,7 @@ python "${SKILL_DIR}/scripts/generate_optimization_html.py" <项目根目录>
           "contains": {
             "三层实体体系构建": {
               "description": "【优化后】以数据库名称为标识创建数据库分类实体作为知识图谱的根节点...",
-              "special_claims": [
+              "special claims": [
                 "【优化后】实体标识符采用类型前缀加层级命名组合的格式..."
               ]
             },
@@ -588,14 +578,8 @@ python "${SKILL_DIR}/scripts/generate_optimization_html.py" <项目根目录>
             }
           }
         }
-      },
-
-      "independent_claims_count": 2,
-      "shared_technical_features": "两个独立权利要求均基于知识图谱技术，共享'知识图谱构建与应用'这一特定技术特征",
-      "key_differences": ["区别技术特征1", "区别技术特征2"],
-      "evasion_paths_blocked": ["规避路径1：将'螺栓连接'上位概括为'可拆卸连接件'", "规避路径2：..."]
+      }
     },
-
     {
       "id": "P2",
       "title": "一种数据库表间关系的隐式外键发现装置",
@@ -619,14 +603,8 @@ python "${SKILL_DIR}/scripts/generate_optimization_html.py" <项目根目录>
             }
           }
         }
-      },
-
-      "independent_claims_count": 1,
-      "shared_technical_features": null,
-      "key_differences": ["区别技术特征1"],
-      "evasion_paths_blocked": ["规避路径1：...", "规避路径2：..."]
+      }
     }
-
   ]
 }
 ```
@@ -646,11 +624,14 @@ python "${SKILL_DIR}/scripts/generate_optimization_html.py" <项目根目录>
 | `key_differences` | string[] | 区别技术特征列表 |
 | `evasion_paths_blocked` | string[] | Step 3 封堵的规避路径列表 |
 
-#### 4.3 验证 JSON 格式
+#### 4.3 格式验证
 
+生成权利要求树后，必须执行以下命令检查权利要求树的格式是否符合规范：
 ```bash
-python "${SKILL_DIR}/scripts/file_tools.py" from_json "${输出目录}/materials/portfolio-v2.json"
+python "${SKILL_DIR}/scripts/claim.py" tree_to_claims "${输出目录}/materials/claim-tree-v1.json"
 ```
+若程序报错，需在保持权利要求树内容不变的情况下调整其结构，再执行上述检查命令，**循环此过程直到权利要求树格式符合核心原则为止**。
+
 **验证后必须 Read 文件检查内容！** 即使命令无报错，也要确认自动修复（如有）没有改变原始意图。验证和检查不通过不能继续 Step 5！
 
 ### Step 5：用户确认
