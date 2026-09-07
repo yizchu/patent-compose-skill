@@ -561,8 +561,17 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 
 ---
 
-## 🤝 支持作者
+## 💬 欢迎交流
 
+欢迎大家对本 Skill 提出宝贵的**评论、建议和改进意见**！无论是功能需求、使用体验反馈，还是代码优化建议，都非常感谢您的参与。
+
+🙏 **感谢每一位贡献者！**
+
+- 🐛 发现 Bug？欢迎提 [Issue](https://github.com/yizchu/patent-compose-skill/issues)
+- 💡 有新想法？欢迎讨论或提 [Feature Request](https://github.com/yizchu/patent-compose-skill/issues)
+- 🔧 想改进代码？欢迎提交 [Pull Request](https://github.com/yizchu/patent-compose-skill/pulls)
+
+期待与您一起打造更好的专利撰写工具！✨
 如果这个 Skill 对您有帮助，可以 Star 支持一下⭐感谢！
 
 <div align="center">
@@ -570,3 +579,5 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 MIT License © [yizchu](https://github.com/yizchu)
 
 </div>
+
+---
