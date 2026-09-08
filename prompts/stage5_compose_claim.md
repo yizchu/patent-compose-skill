@@ -36,7 +36,7 @@
 python "${SKILL_DIR}/scripts/claim.py" tree_to_claims "${输出目录}/materials/portfolio-v2.json" "${输出目录}/patents"
 ```
 
-脚本遍历 `portfolio-v2.json` 中的每件专利，为每件专利自动生成独立的权利要求书文件 `${输出目录}/patents/claims_{专利标题}.md` 。
+脚本遍历 `portfolio-v2.json` 中的每件专利，为每件专利自动生成独立的权利要求书文件 `${输出目录}/patents/{专利标题}/claims_{专利标题}.md` 。
 
 如果脚本执行失败，仔细阅读错误信息，通常是因为权利要求树格式不符合规范（如括号匹配混乱等）。此时需结合错误信息紧急修正 `portfolio-v2.json`。
 

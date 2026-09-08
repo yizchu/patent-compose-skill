@@ -32,7 +32,7 @@
 对**每一件专利**分别生成独立的交底书：
 
 **输出位置**：
-- 独立版：`${输出目录}/patents/disclosure_{专利标题}.md`（每件专利一个）
+- 独立版：`${输出目录}/patents/{专利标题}/disclosure_{专利标题}.md`（每件专利一个）
 - 汇总版：`${输出目录}/materials/disclosure-v2.md`（所有专利的汇总）
 
 **生成逻辑**：
@@ -42,7 +42,7 @@
    - `patents[i].shared_technical_features` → 共同技术特征（多独权时用于阐述单一性）
 2. 从 `disclosure-v1.md` 中提取该专利对应模块的详细技术细节
 3. 从 `prior-art-report.md` 中提取相关现有技术、区别技术特征和创造性评估结论
-4. 按照下方的结构模板生成该专利的交底书，并保存为 `${输出目录}/patents/disclosure_{patents[i].title}.md`
+4. 按照下方的结构模板生成该专利的交底书，并保存为 `${输出目录}/patents/{patents[i].title}/disclosure_{patents[i].title}.md`
 
 #### 交底书结构要求
 
@@ -234,7 +234,7 @@
 2. **分析技术方案**：基于交底书内容，判断每件专利最适合的图表类型
 3. **选择图表组合**：根据规范中的"智能选择策略"，确定主图和辅助图（若需要）的类型
 4. **绘制图表**：按照规范中的 Mermaid 语法和示例，绘制相应的图表
-5. **保存文件**：将每件专利的图表保存到：`${输出目录}/patents/flowcharts_{专利标题}.md`（每件专利一个文件）
+5. **保存文件**：将每件专利的图表保存到：`${输出目录}/patents/{专利标题}/flowcharts_{专利标题}.md`（每件专利一个文件）
 
 #### 每件专利建议绘制的图表清单
 
@@ -304,8 +304,8 @@
 ✓ materials/disclosure-v2.md              (汇总版交底书)
 
 对于每件专利（标题为 {专利标题}）:
-✓ patents/disclosure_{专利标题}.md         (独立交底书)
-✓ patents/flowcharts_{专利标题}.md         (独立附图)
+✓ patents/{专利标题}/disclosure_{专利标题}.md         (独立交底书)
+✓ patents/{专利标题}/flowcharts_{专利标题}.md         (独立附图)
 ```
 
 ---
