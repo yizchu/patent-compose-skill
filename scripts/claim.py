@@ -124,9 +124,12 @@ if __name__ == "__main__":
                     print(f"专利 P{i} 似乎没有正确的权利要求树，请检查它的 claim_tree 字段后再试。")
                     sys.exit(1)
             for i, patent in enumerate(claim_tree["patents"]):
-                claims = tree_to_claims(patent["claim_tree"], patent.get('title', f'P{i}'))
+                patent_title = patent.get('title', f'P{i}')
+                claims = tree_to_claims(patent["claim_tree"], patent_title)
                 if output_dir:
-                    output_path = os.path.join(output_dir, f"claims_{patent.get('title', f'P{i}')}.md")
+                    output_path = os.path.join(output_dir, patent_title,
+                                               f"claims_{patent_title}.md")
+                    os.makedirs(os.path.join(output_dir, patent_title), exist_ok=True)
                     with open(output_path, "w", encoding="utf-8") as f:
                         f.write(claims)
         # 否则默认整个文件就是一棵权利要求树（如 claim-tree.json）
@@ -134,6 +137,7 @@ if __name__ == "__main__":
             claims = tree_to_claims(claim_tree)
             if output_dir:
                 output_path = os.path.join(output_dir, f"claims_{os.path.basename(json_path).split('.')[0]}.md")
+                os.makedirs(output_dir, exist_ok=True)
                 with open(output_path, "w", encoding="utf-8") as f:
                     f.write(claims)
 
