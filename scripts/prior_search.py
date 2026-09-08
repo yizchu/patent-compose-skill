@@ -150,7 +150,7 @@ class CnkiSearch(PriorSearch):
 
                 total_pages = self.page.locator("span.pagerTitleCell")
                 await total_pages.wait_for(state="visible", timeout=10000)
-                total_pages = math.ceil(int((await total_pages.inner_text()).strip().split()[1]) / 20)
+                total_pages = math.ceil(int((await total_pages.inner_text()).strip().split()[1].replace(",", "")) / 20)
 
                 for _page in range(min(total_pages, to_page)):
                     result_table = self.page.locator("table.result-table-list").locator("tbody")
@@ -373,11 +373,8 @@ async def prior_search(project_root: str, home_only: bool = False):
             cnki_search = CnkiSearch(out_dir)
             await cnki_search._init_page()
 
-            for i in range(max_len):
-                if i < len(keywords_cn):
-                    await cnki_search.search_round(keywords_cn[i])
-                if i < len(keywords_en):
-                    await cnki_search.search_round(keywords_en[i])
+            for i in range(len(keywords_cn)):
+                await cnki_search.search_round(keywords_cn[i])
             await cnki_search._cleanup()
         print("√ Done.")
     except Exception as e:
