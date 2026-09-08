@@ -63,7 +63,6 @@ allowed-tools: Read, Write, Edit, Grep, Glob, WebSearch, RunCommand
 - `patents/disclosure_{专利标题}.md` - 各专利独立交底书（最终版）
 - `patents/flowcharts_{专利标题}.md` - 各专利流程图
 - `materials/disclosure-v2.md` - 汇总版最终交底书
-- `materials/flowcharts.md` - 汇总版流程图
 
 ### Stage 5: 撰写权利要求书
 
@@ -87,8 +86,7 @@ patent-compose output/
 │   ├── prior-art-report.md            # Stage 2: 查新分析报告
 │   ├── portfolio-initial.json         # Stage 3: 初始专利组合方案
 │   ├── portfolio-v2.json             # Stage 3: 最终优化后的专利组合
-│   ├── disclosure-v2.md               # Stage 4: 汇总版最终交底书
-│   └── flowcharts.md                  # Stage 4: 汇总版流程图
+│   └── disclosure-v2.md               # Stage 4: 汇总版最终交底书
 ├── claim-optimization/                 # Stage 3: 博弈对抗记录
 │   ├── R1.json ~ R6.json              # 六轮攻防详情
 │   └── claim-optimization.html        # 优化过程报告

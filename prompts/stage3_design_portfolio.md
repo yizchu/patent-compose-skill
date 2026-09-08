@@ -124,7 +124,7 @@ python "${SKILL_DIR}/scripts/file_tools.py" from_json "${输出目录}/materials
   "patents": [
     {
       "id": "P1",
-      "title": "一种[发明名称]，可以是方法/系统/装置/存储介质等",
+      "title": "一种[发明名称]，可以是 方法/系统/装置/存储介质/具体物品名称 中的任意一种，但不能同时是多种",
       "type": "invention",
       "priority": "core" | "secondary",
 
@@ -147,7 +147,7 @@ python "${SKILL_DIR}/scripts/file_tools.py" from_json "${输出目录}/materials
     // 若分多件专利，继续添加类似结构
     {
       "id": "P2",
-      "title": "一种[发明名称]，可以是方法/系统/装置/存储介质等",
+      "title": "一种[发明名称]，可以是 方法/系统/装置/存储介质/具体物品名称 中的任意一种，但不能同时是多种",
       "type": "invention",
       "priority": "core" | "secondary",
 
@@ -530,7 +530,6 @@ python "${SKILL_DIR}/scripts/generate_optimization_html.py" <项目根目录>
 - **保持树形结构**：格式与 `claim-tree-v1.json` 完全一致（独立权利要求名称为键，包含 `description`、`contains`、`special claims`）
 - **界定专利归属**：`independent_claims` 明确列出该专利包含的独立权利要求（来自 v1 的最浅层键），每个 `claim_tree` 只包含属于该专利的权利要求
 - **简洁标注优化**：只在优化过的部分前标注【优化后】，不记录详细的优化过程
-- **记录封堵成果**：`evasion_paths_blocked` 填充 Step 3 中成功封堵的规避路径列表
 
 **严格遵循结构模板**：
 
@@ -545,8 +544,8 @@ python "${SKILL_DIR}/scripts/generate_optimization_html.py" <项目根目录>
       "title": "一种基于知识图谱增强的关系型数据库知识问答系统",
       "type": "invention",
       "priority": "core",
-
       "independent_claims": ["数据库Schema知识图谱自动构建", "知识图谱增强的自然语言转SQL查询"],
+      "shared_technical_features": "多个独权时的共同技术特征",
 
       "claim_tree": {
         "数据库Schema知识图谱自动构建": {
@@ -585,8 +584,8 @@ python "${SKILL_DIR}/scripts/generate_optimization_html.py" <项目根目录>
       "title": "一种数据库表间关系的隐式外键发现装置",
       "type": "invention",
       "priority": "secondary",
-
       "independent_claims": ["隐式外键智能发现方法"],
+      "shared_technical_features": "多个独权时的共同技术特征",
 
       "claim_tree": {
         "隐式外键智能发现方法": {
@@ -618,11 +617,8 @@ python "${SKILL_DIR}/scripts/generate_optimization_html.py" <项目根目录>
 | `type` | string | 固定 `"invention"` |
 | `priority` | string | `"core"` 或 `"secondary"` |
 | `independent_claims` | string[] | 来自 v1 的独立权利要求名称列表 |
-| `claim_tree` | object | 权利要求树（最浅层键 = independent_claims 的元素） |
-| `independent_claims_count` | number | 独立权利要求数量 |
 | `shared_technical_features` | string/null | 多独权时的共同技术特征，单独权时为 null |
-| `key_differences` | string[] | 区别技术特征列表 |
-| `evasion_paths_blocked` | string[] | Step 3 封堵的规避路径列表 |
+| `claim_tree` | object | 权利要求树（最浅层键 = independent_claims 的元素） |
 
 #### 4.3 格式验证
 

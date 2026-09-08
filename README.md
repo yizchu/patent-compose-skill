@@ -66,15 +66,15 @@ patent-compose output/
 │   ├── prior-art-report.md            # Stage 2: 查新分析报告
 │   ├── portfolio-initial.json         # Stage 3: 初始专利组合方案
 │   ├── portfolio-v2.json             # Stage 3: 最终优化后的专利组合
-│   ├── disclosure-v2.md               # Stage 4: 汇总版最终交底书
-│   └── flowcharts.md                  # Stage 4: 汇总版流程图
+│   └── disclosure-v2.md               # Stage 4: 汇总版最终交底书
 ├── claim-optimization/                 # Stage 3: 博弈对抗记录
 │   ├── R1.json ~ R6.json              # 六轮攻防详情
 │   └── claim-optimization.html        # 优化过程报告
-├── patents/                            # Stage 4: 各专利独立文件
-│   ├── disclosure_{专利标题}.md        # 各专利独立交底书
-│   └── flowcharts_{专利标题}.md        # 各专利流程图
-└── prior art/                         # 查新检索结果
+├── patents/                            # Stage 4-5: 各专利独立文件
+│   ├── disclosure_{专利标题}.md        # Stage 4: 各专利独立交底书
+│   ├── flowcharts_{专利标题}.md        # Stage 4: 各专利附图
+│   └── claims_{专利标题}.md           # Stage 5: 各专利权利要求书
+├── prior art/                         # 查新检索结果
 └── project files/                     # 项目文件产物
 ```
 
@@ -167,7 +167,7 @@ patent-compose output/
 | **Stage 1** | `claim-tree-v1.json`（初始版本） | 从项目文件中直接提取原始技术特征 |
 | **Stage 2** | 结合查新报告标注（特征级对比） | 标记哪些特征已被现有技术公开 |
 | **Stage 3** | `portfolio-v2.json`（优化后） | 划分权利要求树的一级模块（方法/系统）到不同的专利中，每个专利对应一棵优化后的权利要求树 |
-| **Stage 4** | `portfolio-v2.json`（优化后） | 基于优化后的专利组合和权利要求树，生成流程图和最终交底书 |
+| **Stage 4** | `portfolio-v2.json`（优化后） | 基于优化后的专利组合和权利要求树，生成附图和最终交底书 |
 | **Stage 5** | `portfolio-v2.json`（优化后） | 基于优化后的专利组合和权利要求树，撰写最终权利要求书 |
 ---
 
@@ -511,11 +511,11 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 
 <!-- 第三组：Stage 4 -->
 <tr>
-<th width="100%" align="center" colspan="2">Stage 4<br><sub>交底书 + 流程图</sub></th>
+<th width="100%" align="center" colspan="2">Stage 4<br><sub>交底书 + 附图</sub></th>
 </tr>
 <tr>
 <th width="50%" align="center">各专利交底书</th>
-<th width="50%" align="center">流程图</th>
+<th width="50%" align="center">附图</th>
 </tr>
 <tr>
 <td width="50%" valign="top" align="center">
@@ -525,7 +525,6 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 <img src="docs/assets/专利flowchart 效果图.png" alt="Stage 4: 各专利 Mermaid 流程图 & 汇总版流程图" width="100%" />
 </td>
 </tr>
-
 </table>
 
 > 💡 展示的所有运行效果均基于 https://github.com/yizchu/DBAgent 真实案例生成。
@@ -574,10 +573,10 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 期待与您一起打造更好的专利撰写工具！✨
 如果这个 Skill 对您有帮助，可以 Star 支持一下⭐感谢！
 
+---
+
 <div align="center">
 
 MIT License © [yizchu](https://github.com/yizchu)
 
 </div>
-
----
