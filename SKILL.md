@@ -1,13 +1,13 @@
 ---
 name: patent-compose-skill
-description: AI驱动的专利撰写工作流，自动化完成项目分析、查新检索、专利组合生成与优化、交底书和流程图撰写。
+description: AI驱动的专利撰写工作流，自动化完成项目分析、查新检索、专利组合生成与优化、交底书和流程图撰写、权利要求书及完整申请文件生成。
 user-invocable: true
 allowed-tools: Read, Write, Edit, Grep, Glob, WebSearch, RunCommand
 ---
 
 ## 概述
 
-本 Skill 用于辅助完成专利撰写全流程，包含五个阶段：项目分析、查新、专利组合生成与对抗优化、交底书与流程图撰写、权利要求书生成。
+本 Skill 用于辅助完成专利撰写全流程，包含**六个阶段**：项目分析、查新、专利组合生成与对抗优化、交底书与流程图撰写、权利要求书生成、完整专利申请文件（说明书+摘要）生成。
 
 ## 核心原则
 - **固定输出目录**：专利项目根目录下的 `patent-compose output`。不要默认写到其他任何目录。
@@ -73,38 +73,60 @@ allowed-tools: Read, Write, Edit, Grep, Glob, WebSearch, RunCommand
 **输出**：
 - `patents/claims_{专利标题}.md` - 各专利独立的权利要求书文件
 
+### Stage 6: 撰写完整专利申请文件
+
+**`Read`** `${SKILL_DIR}/prompts/stage6_compose_application.md`
+
+**功能**：基于交底书、权利要求书和附图，为每件专利撰写完整的说明书、摘要，并进行附图标记注册和一致性检查，形成符合法定要求的专利申请文件四件套
+
+**输出**：
+- `patents/specification_{专利标题}.md` - 各专利独立的说明书
+- `patents/abstract_{专利标题}.md` - 各专利独立的摘要
+
 ## 输出目录结构
 
 ```
 patent-compose output/
-├── materials/                          # 汇总版文件（Stage 1-4）
+├── materials/                          # 材料文件
 │   ├── disclosure-v1.md               # Stage 1: 原始技术交底书
 │   ├── claim-tree-v1.json             # Stage 1: 初始权利要求树
+│   ├── formula_inventory.md           # Stage 1: 公式清单
 │   ├── keyword-cn.json                # Stage 2: 中文检索词
 │   ├── keyword-en.json                # Stage 2: 英文检索词
-│   ├── prior-art.md                   # Stage 2: 现有技术清单
+│   ├── prior-art.md                   # Stage 2: 相关技术清单
 │   ├── prior-art-report.md            # Stage 2: 查新分析报告
 │   ├── portfolio-initial.json         # Stage 3: 初始专利组合方案
-│   ├── portfolio-v2.json             # Stage 3: 最终优化后的专利组合
+│   ├── portfolio-v2.json             # Stage 3: 优化后的专利组合
 │   └── disclosure-v2.md               # Stage 4: 汇总版最终交底书
 ├── claim-optimization/                 # Stage 3: 博弈对抗记录
 │   ├── R1.json ~ R6.json              # 六轮攻防详情
 │   └── claim-optimization.html        # 优化过程报告
-├── patents/                            # Stage 4-5: 各专利独立文件
-│   ├── disclosure_{专利标题}.md        # Stage 4: 各专利独立交底书
-│   ├── flowcharts_{专利标题}.md        # Stage 4: 各专利流程图
-│   └── claims_{专利标题}.md           # Stage 5: 各专利权利要求书
+├── patents/                            # 各专利申请文件夹
+│   ├── {专利标题}/
+│   │   ├── disclosure_{专利标题}.md    # Stage 4: 独立交底书
+│   │   ├── flowcharts_{专利标题}.md    # Stage 4: Mermaid流程图
+│   │   ├── claims_{专利标题}.md       # Stage 5: 权利要求书
+│   │   ├── specification_{专利标题}.md # Stage 6: 说明书
+│   │   └── abstract_{专利标题}.md      # Stage 6: 摘要
 ├── prior art/                         # 查新检索结果
-└── project files/                     # 项目文件产物
+└── project files/                     # 项目文件副本
 ```
 
 ## 脚本工具
 
 | 脚本 | 功能 | 用途 |
 |------|------|------|
-| `analyze_project.py` | 项目源码和文档分析，提取技术方案 | Stage 1 |
-| `prior_search.py` | 专利数据库检索与查新分析 | Stage 2 |
-| `generate_optimization_html.py` | 六轮博弈对抗优化报告生成 | Stage 3 |
-| `claim.py` | 权利要求树转权利要求书文本 | Stage 5 |
+| `analyze_project.py` | 项目源码和文档分析，提取技术方案，敏感信息检测 | Stage 1 |
+| `prior_search.py` | 专利数据库检索与查新分析（支持CNKI/FPO/WebSearch） | Stage 2 |
+| `generate_optimization_html.py` | 六轮博弈对抗优化报告生成（HTML可视化） | Stage 3 |
+| `claim.py` | 权利要求树转权利要求书文本，格式验证 | Stage 5 |
 | `file_tools.py` | 文件读写、JSON 格式验证与自动修复 | 通用工具 |
-| `config.py` | 全局配置（输出目录等） | 通用配置 |
+| `config.py` | 全局配置（输出目录、缩进等） | 通用配置 |
+
+## 环境依赖
+- **Python 3.10+**
+- **浏览器自动化**：Playwright（用于专利数据库检索）
+- **文档解析**：python-docx, python-pptx, pdfplumber, pywin32
+- **JSON 格式验证与自动修复**：json-repair
+
+- **安装命令**：`pip install -r requirements.txt`
