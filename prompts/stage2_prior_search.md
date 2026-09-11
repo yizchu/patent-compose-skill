@@ -49,7 +49,7 @@
 
 **选项1 - 仅国内**：
 ```bash
-python "${SKILL_DIR}/scripts/prior_search.py" <项目根目录> --home-only
+python "${SKILL_DIR}/scripts/prior_search.py" <项目根目录> --home_only
 ```
 
 **选项2 - 国内外**：
