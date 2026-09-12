@@ -103,79 +103,69 @@ python "${SKILL_DIR}/scripts/file_tools.py" from_json "${输出目录}/materials
 
 #### 2.4 保存初始专利组合方案
 
-将 Step 2 生成的初始专利组合方案保存到```${输出目录}/materials/portfolio-initial.json```。
+将 Step 2 生成的初始专利组合方案保存到```${输出目录}/materials/portfolio-initial.json```。另将该方案的概述写入`${输出目录}/materials/portfolio-initial.md`，概述无需重复一遍权利要求树，但需要写明方案的原因。
 
-**严格遵循结构模板**：
+初始专利组合方案**严格遵循JSON结构模板**：
 
 ```json
-{
-  "project_name": "[项目名称]",
-  "generation_date": "2026-09-02",
-  "portfolio_summary": {
-    "patent_count": N,
-    "strategy_description": "一句话描述拆分策略",
-    "trade_secrets": [
-      {
-        "content": "建议作为商业秘密保护的技术内容",
-        "reason": "为什么不适合申请专利"
-      }
-    ]
-  },
-  "patents": [
+[
     {
-      "id": "P1",
-      "title": "一种[发明名称]，可以是 方法/系统/装置/存储介质/具体物品名称 中的任意一种，但不能同时是多种",
-      "type": "invention",
-      "priority": "core" | "secondary",
+        "id": "P1",
+        "title": "一种[发明名称]，可以是 方法/系统/装置/存储介质/具体物品名称 中的任意一种，但不能同时是多种",
+        "type": "invention",
+        "priority": "core" | "secondary",
 
-      "independent_claims": ["来自v1的独权名称1", "来自v1的独权名称2"],
+        "independent_claims": ["来自v1的独权名称1", "来自v1的独权名称2"],
 
-      "claim_tree": {
-        "来自v1的独权名称1": {
-          "description": "直接引用v1的描述...",
-          "contains": { ... },
-          "special claims": ["..."]
+        "claim_tree": {
+            "来自v1的独权名称1": {
+              "description": "直接引用v1的描述...",
+              "contains": { ... },
+              "special claims": ["..."]
+            },
+            "来自v1的独权名称2": {
+              "description": "直接引用v1的描述...",
+              "contains": { ... }
+            }
         },
-        "来自v1的独权名称2": {
-          "description": "直接引用v1的描述...",
-          "contains": { ... }
-        }
-      },
 
-      "shared_technical_features": "多个独权时的共同技术特征",
+        "shared_technical_features": "多个独权时的共同技术特征"
     },
     // 若分多件专利，继续添加类似结构
     {
-      "id": "P2",
-      "title": "一种[发明名称]，可以是 方法/系统/装置/存储介质/具体物品名称 中的任意一种，但不能同时是多种",
-      "type": "invention",
-      "priority": "core" | "secondary",
+        "id": "P2",
+        "title": "一种[发明名称]，可以是 方法/系统/装置/存储介质/具体物品名称 中的任意一种，但不能同时是多种",
+        "type": "invention",
+        "priority": "core" | "secondary",
 
-      "independent_claims": ["来自v1的独权名称3"],
+        "independent_claims": ["来自v1的独权名称3"],
 
-      "claim_tree": {
-        "来自v1的独权名称3": {
-          "description": "直接引用v1的描述...",
-          "contains": { ... },
-          "special claims": ["..."]
-        }
-      },
+        "claim_tree": {
+            "来自v1的独权名称3": {
+              "description": "直接引用v1的描述...",
+              "contains": { ... },
+              "special claims": ["..."]
+            }
+        },
 
-      "shared_technical_features": null
+        "shared_technical_features": null
+    },
+    {
+        "id": "P3",
+        ......
     }
-  ]
-}
+]
 ```
 
 #### 2.5 格式验证
 
 生成权利要求树后，必须执行以下命令检查权利要求树的格式是否符合规范：
 ```bash
-python "${SKILL_DIR}/scripts/claim.py" tree_to_claims "${输出目录}/materials/claim-tree-v1.json"
+python "${SKILL_DIR}/scripts/claim.py" tree_to_claims "${输出目录}/materials/portfolio-initial.json"
 ```
 若程序报错，需在保持权利要求树内容不变的情况下调整其结构，再执行上述检查命令，**循环此过程直到权利要求树格式符合核心原则为止**。
 
-**验证后必须 Read 文件检查内容！** 即使命令无报错，也要确认自动修复（如有）没有改变原始意图。验证和检查不通过不能继续 Step 3！
+**验证后必须 Read 完整文件检查内容！** 即使命令无报错，也要确认自动修复（如有）没有改变原始意图。验证和检查不通过不能继续 Step 3！
 
 ---
 
@@ -527,85 +517,87 @@ python "${SKILL_DIR}/scripts/generate_optimization_html.py" <项目根目录>
 将 Step 3 优化后的权利要求树保存至 `${输出目录}/materials/portfolio-v2.json`
 
 **核心原则**：
-- **保持树形结构**：格式与 `claim-tree-v1.json` 完全一致（独立权利要求名称为键，包含 `description`、`contains`、`special claims`）
+- **结构清晰**：只列出所有专利和专利的信息，严格按照结构模板组织，不要生成任何额外的内容或注释
+- **保持权利要求树结构**：格式与 `claim-tree-v1.json` 完全一致（独立权利要求名称为键，包含 `description`、`contains`、`special claims`）
 - **界定专利归属**：`independent_claims` 明确列出该专利包含的独立权利要求（来自 v1 的最浅层键），每个 `claim_tree` 只包含属于该专利的权利要求
 - **简洁标注优化**：只在优化过的部分前标注【优化后】，不记录详细的优化过程
 
 **严格遵循结构模板**：
 
 ```json
-{
-  "project_name": "[项目名称]",
-  "generation_date": "2026-09-02",
-
-  "patents": [
+[
     {
-      "id": "P1",
-      "title": "一种基于知识图谱增强的关系型数据库知识问答系统",
-      "type": "invention",
-      "priority": "core",
-      "independent_claims": ["数据库Schema知识图谱自动构建", "知识图谱增强的自然语言转SQL查询"],
-      "shared_technical_features": "多个独权时的共同技术特征",
-
-      "claim_tree": {
-        "数据库Schema知识图谱自动构建": {
-          "description": "【优化后】连接关系型数据库后获取所有数据表，对每张表从信息模式中提取表属性和列属性...",
-          "contains": {
-            "三层实体体系构建": {
-              "description": "【优化后】以数据库名称为标识创建数据库分类实体作为知识图谱的根节点...",
-              "special claims": [
-                "【优化后】实体标识符采用类型前缀加层级命名组合的格式..."
-              ]
+        "id": "P1",
+        "title": "一种基于知识图谱增强的关系型数据库知识问答系统",
+        "type": "invention",
+        "priority": "core",
+        "independent_claims": [
+            "数据库Schema知识图谱自动构建",
+            "知识图谱增强的自然语言转SQL查询"
+        ],
+        "shared_technical_features": "多个独权时的共同技术特征",
+        "claim_tree": {
+            "数据库Schema知识图谱自动构建": {
+                "description": "【优化后】连接关系型数据库后获取所有数据表，对每张表从信息模式中提取表属性和列属性...",
+                "contains": {
+                    "三层实体体系构建": {
+                        "description": "【优化后】以数据库名称为标识创建数据库分类实体作为知识图谱的根节点...",
+                        "special claims": [
+                            "【优化后】实体标识符采用类型前缀加层级命名组合的格式..."
+                        ]
+                    },
+                    "实体属性提取": {
+                        "description": "从关系型数据库的表元数据表获取表注释、存储引擎、字符集属性..."
+                    },
+                    "隐式外键发现": {
+                        "description": "【优化后】通过分析外键命名规则自动发现表间隐式关联关系..."
+                    }
+                }
             },
-            "实体属性提取": {
-              "description": "从关系型数据库的表元数据表获取表注释、存储引擎、字符集属性..."
-            },
-            "隐式外键发现": {
-              "description": "【优化后】通过分析外键命名规则自动发现表间隐式关联关系..."
+            "知识图谱增强的自然语言转SQL查询": {
+                "description": "【优化后】调用支持推理过程输出的大语言模型获取推理内容和查询结果...",
+                "contains": {
+                    "知识图谱序列化": {
+                        "description": "将知识图谱转换为大语言模型可理解的格式..."
+                    },
+                    "多轮对话上下文融合": {
+                        "description": "结合历史对话记录生成上下文感知的查询语句..."
+                    }
+                }
             }
-          }
-        },
-
-        "知识图谱增强的自然语言转SQL查询": {
-          "description": "【优化后】调用支持推理过程输出的大语言模型获取推理内容和查询结果...",
-          "contains": {
-            "知识图谱序列化": {
-              "description": "将知识图谱转换为大语言模型可理解的格式..."
-            },
-            "多轮对话上下文融合": {
-              "description": "结合历史对话记录生成上下文感知的查询语句..."
-            }
-          }
         }
-      }
     },
     {
-      "id": "P2",
-      "title": "一种数据库表间关系的隐式外键发现装置",
-      "type": "invention",
-      "priority": "secondary",
-      "independent_claims": ["隐式外键智能发现方法"],
-      "shared_technical_features": "多个独权时的共同技术特征",
-
-      "claim_tree": {
-        "隐式外键智能发现方法": {
-          "description": "【优化后】一种通过分析数据库元数据和外键命名规则自动发现表间隐式关联关系的方法...",
-          "contains": {
-            "命名规则模式库构建": {
-              "description": "【优化后】建立常见的外键命名模式集合..."
-            },
-            "候选外键识别": {
-              "description": "基于命名规则匹配潜在的外键关系..."
-            },
-            "置信度评估与筛选": {
-              "description": "通过多维度指标评估候选外键的可信度..."
+        "id": "P2",
+        "title": "一种数据库表间关系的隐式外键发现装置",
+        "type": "invention",
+        "priority": "secondary",
+        "independent_claims": [
+            "隐式外键智能发现方法"
+        ],
+        "shared_technical_features": "多个独权时的共同技术特征",
+        "claim_tree": {
+            "隐式外键智能发现方法": {
+                "description": "【优化后】一种通过分析数据库元数据和外键命名规则自动发现表间隐式关联关系的方法...",
+                "contains": {
+                    "命名规则模式库构建": {
+                        "description": "【优化后】建立常见的外键命名模式集合..."
+                    },
+                    "候选外键识别": {
+                        "description": "基于命名规则匹配潜在的外键关系..."
+                    },
+                    "置信度评估与筛选": {
+                        "description": "通过多维度指标评估候选外键的可信度..."
+                    }
+                }
             }
-          }
         }
-      }
+    },
+    {
+        "id": "P3",
+        ......
     }
-  ]
-}
+]
 ```
 
 **关键字段对照表**：
@@ -628,7 +620,7 @@ python "${SKILL_DIR}/scripts/claim.py" tree_to_claims "${输出目录}/materials
 ```
 若程序报错，需在保持权利要求树内容不变的情况下调整其结构，再执行上述检查命令，**循环此过程直到权利要求树格式符合核心原则为止**。
 
-**验证后必须 Read 文件检查内容！** 即使命令无报错，也要确认自动修复（如有）没有改变原始意图。验证和检查不通过不能继续 Step 5！
+**验证后必须 Read 完整文件检查内容！** 即使命令无报错，也要确认自动修复（如有）没有改变原始意图。验证和检查不通过不能继续 Step 5！
 
 ### Step 5：用户确认
 提醒用户检查“权利要求树”和其优化过程是否符合预期，同时提示用户“若会话上下文接近上限，可以在新会话继续之后的步骤，但要记得告诉智能体已经完成了Stage3”，确认无误后Stage3才算完成。如果用户有异议，需要结合用户反馈和已有分析结果进行修正，直到用户满意为止。
