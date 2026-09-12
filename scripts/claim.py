@@ -118,12 +118,12 @@ if __name__ == "__main__":
             sys.exit(1)
 
         # 如果分了多专利（如 portfolio.json）
-        if "patents" in claim_tree:
-            for i, patent in enumerate(claim_tree["patents"]):
+        if type(claim_tree) == list:
+            for i, patent in enumerate(claim_tree):
                 if "claim_tree" not in patent:
                     print(f"专利 P{i} 似乎没有正确的权利要求树，请检查它的 claim_tree 字段后再试。")
                     sys.exit(1)
-            for i, patent in enumerate(claim_tree["patents"]):
+            for i, patent in enumerate(claim_tree):
                 patent_title = patent.get('title', f'P{i}')
                 claims = tree_to_claims(patent["claim_tree"], patent_title)
                 if output_dir:
@@ -140,8 +140,8 @@ if __name__ == "__main__":
                 os.makedirs(output_dir, exist_ok=True)
                 with open(output_path, "w", encoding="utf-8") as f:
                     f.write(claims)
-
-        print(f"✅ 权利要求书已保存至：{output_dir}")
+        if output_dir is not None:
+            print(f"✅ 权利要求书已保存至：{output_dir}")
 
     elif command == "claims_to_tree":
         pass
