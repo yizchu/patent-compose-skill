@@ -190,7 +190,7 @@ $$
 ---
 
 ### Step 6：初步生成"权利要求树"
-**`Read`** `${输出目录}/materials/disclosure-v1.md` 文件，该文件已包含项目的分析结果。基于分析结果，构建一棵完整的"权利要求树"，用JSON格式表示，保存至 `${输出目录}/materials/claim-tree-v1.json` 文件。
+**`Read`** `${输出目录}/materials/disclosure-v1.md` 文件，该文件已包含项目的分析结果。基于分析结果，构建一棵完整的"权利要求树"，用JSON格式表示，保存至 `${输出目录}/materials/claim-tree-v1.json` 文件，但你不能直接生成一个 JSON 文件，而必须先 `Read` `${SKILL_DIR}/prompts/references/generate_json.md`，根据里面的指南生成。
 
 **格式验证**：
 

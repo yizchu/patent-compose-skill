@@ -11,49 +11,23 @@
 
 ---
 
-## 📋 JSON 生成与验证规范
+## 📋 JSON 生成规范（统一采用 YAML → JSON 两阶段生成法）
 
-**【重要】在整个 Stage 3 中，每次生成 JSON 文件，都必须遵守以下规范并在生成后立即验证！**
+**【重要】在整个 Stage 3 中，每次生成 JSON 文件，都必须先 `Read` `${SKILL_DIR}/prompts/references/generate_json.md`，根据里面的指南采用 **YAML → JSON 两阶段生成法**！**
 
-### ✅ 格式要求
+### 核心流程
 
-1. **必须使用双引号**：所有字符串和字段名必须用 `"double quotes"` 包裹，**不能用单引号**
-2. **不能有尾逗号**：数组或对象的最后一个元素后面**不能加逗号**
-3. **布尔值小写**：使用 `true/false`，不能是 `True/False` 或 `"true"/"false"`
-4. **嵌套层级对齐**：保持正确的缩进（建议2空格或4空格）
-5. ⚠️**括号匹配**：所有括号必须成对出现且正确匹配，不要出现未关闭的括号。
-6. ⚠️**内容完整**：确保生成的内容没有被截断。
-
-### 验证方法（每次生成 JSON 后必执行）⭐
-
-**使用专用接口**：`python "${SKILL_DIR}/scripts/file_tools.py" from_json <JSON文件完整路径>`
-
-**该接口的功能**：
-1. **自动检测**：尝试用 `json.load()` 解析 JSON 文件
-2. **自动修复**：如果格式有误（单引号、尾逗号、括号不匹配等），会**自动修复**并写回原文件
-
-**⚠️ 重要提示：每次生成 JSON 文件后，都必须立即验证，验证后必须再次检查内容！**
-
-由于自动修复功能可能会**改变或丢失部分原始内容**（例如修复时可能截断、合并或误改某些字段值或嵌套结构），因此在每次运行 `from_json` 后，必须立即 Read 修复后的 JSON 文件，仔细检查以下内容是否符合原本的生成意图：
-- ✅ 所有必填字段是否存在且值正确
-- ✅ 数组/对象的嵌套结构是否符合结构模板
-- ✅ 字符串内容是否被意外截断或修改
-- ✅ 数值、布尔值等类型是否正确
-
-如果发现修复后的内容和结构与预期不符，必须立即使用 `Write` 工具将**正确的完整内容**重新写入该 JSON 文件，然后再次运行 `from_json` 验证，直到格式和内容都完全正确为止。
+1. **先读指南**：`Read` `${SKILL_DIR}/prompts/references/generate_json.md`
+2. **生成 YAML**：按照标准 YAML 语法生成 `.yaml` 中间文件
+3. **转换为 JSON**：执行 `python "${SKILL_DIR}/scripts/yaml_to_json.py" <YAML文件路径>`
+4. **验证结果**：执行 `python "${SKILL_DIR}/scripts/file_tools.py" from_json <JSON文件路径>` 并 **Read** 检查内容
 
 **示例**：
 ```bash
-# Step 2: 验证初始组合
-python "${SKILL_DIR}/scripts/file_tools.py" from_json "${输出目录}/materials/portfolio-initial.json"
-
-# Step 3: 每轮优化后验证
-python "${SKILL_DIR}/scripts/file_tools.py" from_json "${输出目录}/claim-optimization/R1.json"
-python "${SKILL_DIR}/scripts/file_tools.py" from_json "${输出目录}/claim-optimization/R2.json"
-# ... R3-R6 同理
-
-# Step 4: 验证最终结果
-python "${SKILL_DIR}/scripts/file_tools.py" from_json "${输出目录}/materials/portfolio-v2.json"
+# Step 2: 生成并验证初始组合
+# 1. 先生成 portfolio-initial.yaml
+# 2. python "${SKILL_DIR}/scripts/yaml_to_json.py" "${输出目录}/materials/portfolio-initial.yaml"
+# 3. python "${SKILL_DIR}/scripts/file_tools.py" from_json "${输出目录}/materials/portfolio-initial.json"
 ```
 
 ---
@@ -103,9 +77,20 @@ python "${SKILL_DIR}/scripts/file_tools.py" from_json "${输出目录}/materials
 
 #### 2.4 保存初始专利组合方案
 
-将 Step 2 生成的初始专利组合方案保存到```${输出目录}/materials/portfolio-initial.json```。另将该方案的概述写入`${输出目录}/materials/portfolio-initial.md`，概述无需重复一遍权利要求树，但需要写明方案的原因。
+将 Step 2 生成的初始专利组合方案保存到 `${输出目录}/materials/portfolio-initial.json`，但你不能直接生成一个 JSON 文件，而必须先 `Read` `${SKILL_DIR}/prompts/references/generate_json.md`，根据里面的指南采用 **YAML → JSON 两阶段生成法**（先生成 `.yaml` 文件，再转换为 `.json` 文件）。
 
-初始专利组合方案**严格遵循JSON结构模板**：
+同时生成决策说明文档 `${输出目录}/materials/portfolio-initial.md`，该文档无需重复记录专利的权利要求树，而应包含以下结构性内容：
+**【必须包含的章节】**：
+1. **拆分策略总述**（2-3句话概括整体思路）
+2. **拆分决策依据**（逐项说明：
+   - 哪些独权被合并到同一件专利？基于什么共同技术特征？
+   - 哪些独权被拆分为独立专利？基于什么差异化考虑？
+   - 哪些技术点被排除（作为商业秘密或常规实现）？理由是什么？
+）
+3. **单一性合规说明**（多独权专利需论证满足"总的发明构思"要求）
+4. **风险提示**（标注可能存在的规避风险或审查风险点）
+
+初始专利组合方案**结构模板**：
 
 ```json
 [
@@ -134,24 +119,6 @@ python "${SKILL_DIR}/scripts/file_tools.py" from_json "${输出目录}/materials
     // 若分多件专利，继续添加类似结构
     {
         "id": "P2",
-        "title": "一种[发明名称]，可以是 方法/系统/装置/存储介质/具体物品名称 中的任意一种，但不能同时是多种",
-        "type": "invention",
-        "priority": "core" | "secondary",
-
-        "independent_claims": ["来自v1的独权名称3"],
-
-        "claim_tree": {
-            "来自v1的独权名称3": {
-              "description": "直接引用v1的描述...",
-              "contains": { ... },
-              "special claims": ["..."]
-            }
-        },
-
-        "shared_technical_features": null
-    },
-    {
-        "id": "P3",
         ......
     }
 ]
@@ -173,7 +140,7 @@ python "${SKILL_DIR}/scripts/claim.py" tree_to_claims "${输出目录}/materials
 
 基于 Step 2 生成的专利组合，通过多轮对抗来发现并封堵专利布局中的漏洞。博弈针对的是 Step 2.3 确定的每件专利的权利要求树（直接引用 claim-tree-v1.json），多件专利同时进行博弈。
 
-**【重要】**：每一轮攻防结束后，必须立即将该轮的完整过程保存到独立文件```${输出目录}/claim-optimization/R{n}.json```并验证格式，其中 `n` 为轮次编号（1-6），**验证不通过不能进入下一轮攻防！**
+**【重要】**：每一轮攻防结束后，必须立即将该轮的完整过程保存到独立文件```${输出目录}/claim-optimization/R{n}.json```并验证格式，其中 `n` 为轮次编号（1-6），**但你不能直接生成一个 JSON 文件，而必须先 `Read` `${SKILL_DIR}/prompts/references/generate_json.md`，根据里面的指南采用 **YAML → JSON 两阶段生成法**（先生成 `.yaml` 文件，再转换为 `.json` 文件）。验证不通过不能进入下一轮攻防！**
 
 **⚠️ 必需字段清单**（生成JSON时必须包含以下所有字段，缺一不可）：
 
@@ -514,7 +481,7 @@ python "${SKILL_DIR}/scripts/generate_optimization_html.py" <项目根目录>
 
 #### 4.2 构建最终权利要求树（portfolio-v2.json）
 
-将 Step 3 优化后的权利要求树保存至 `${输出目录}/materials/portfolio-v2.json`
+将 Step 3 优化后的权利要求树保存至 `${输出目录}/materials/portfolio-v2.json`，但你不能直接生成一个 JSON 文件，而必须先 `Read` `${SKILL_DIR}/prompts/references/generate_json.md`，根据里面的指南采用 **YAML → JSON 两阶段生成法**（先生成 `.yaml` 文件，再转换为 `.json` 文件）。
 
 **核心原则**：
 - **结构清晰**：只列出所有专利和专利的信息，严格按照结构模板组织，不要生成任何额外的内容或注释
