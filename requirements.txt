@@ -11,3 +11,6 @@ pdfplumber>=0.11.9
 pywin32>=306
 # json自动修复库，用于修复 JSON 格式错误
 json-repair
+
+# YAML 解析库，用于 YAML 到 JSON 的转换
+pyyaml>=6.0
