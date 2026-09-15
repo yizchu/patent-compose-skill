@@ -157,10 +157,8 @@ class YamlToJsonConverter:
         Returns:
             bool: 转换是否成功（所有步骤都通过）
         """
-        print("=" * 60)
-        print("YAML to JSON 转换器")
-        print("=" * 60)
-        print(f"\n输入文件: {self.yaml_path}")
+        print("YAML -> JSON")
+        print(f"输入文件: {self.yaml_path}")
         print(f"输出文件: {self.json_path}\n")
 
         # 步骤 1: 验证 YAML 文件
@@ -196,9 +194,6 @@ class YamlToJsonConverter:
             print("\n❌ JSON 文件验证失败，转换未完成")
             return False
 
-        print("\n" + "=" * 60)
-        print("🎉 转换完成！")
-        print("=" * 60)
         print(f"\n输出文件路径: {self.json_path.absolute()}")
 
         return True
