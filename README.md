@@ -40,11 +40,6 @@
   ```bash
   pip install -r requirements.txt
   ```
-  主要依赖包括：
-  - `playwright` >= 1.62.0（浏览器自动化，用于专利检索）
-  - `python-docx` / `python-pptx` / `pdfplumber`（文档解析）
-  - `pywin32`（Windows COM接口，支持旧版Office文件）
-  - `json-repair`（JSON格式自动修复）
 
 ### 快速上手
 
@@ -62,7 +57,7 @@ pip install -r requirements.txt
 
 # 3. 准备待分析的项目（包含源码/文档/设计稿等）
 
-# 4. 在IDE中调用技能，按提示完成7个阶段
+# 4. 在IDE中调用技能，按提示完成7个阶段，也可以任选一个阶段开始
 ```
 
 #### 方式二：项目级部署（项目技能）
