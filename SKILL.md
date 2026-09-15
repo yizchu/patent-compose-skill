@@ -111,20 +111,23 @@ patent-compose output/
 │   ├── prior-art.md                   # Stage 3: 相关技术清单
 │   ├── prior-art-report.md            # Stage 3: 查新分析报告
 │   ├── portfolio-initial.json         # Stage 4: 初始专利组合方案
+│   ├── portfolio-initial.md           # Stage 4: 初始专利组合方案的生成报告
 │   ├── portfolio-v2.json             # Stage 4: 优化后的专利组合
 │   └── disclosure-v2.md               # Stage 5: 汇总版最终交底书
 ├── claim-optimization/                 # Stage 4: 博弈对抗记录
 │   ├── R1.json ~ R6.json              # 六轮攻防详情
-│   └── claim-optimization.html        # 优化过程报告
+│   └── claim-optimization.html        # 优化过程可视化报告（HTML）
 ├── patents/                            # 各专利申请文件夹
-│   ├── {专利标题}/
-│   │   ├── disclosure_{专利标题}.md    # Stage 5: 独立交底书
-│   │   ├── flowcharts_{专利标题}.md    # Stage 5: Mermaid附图
-│   │   ├── claims_{专利标题}.md       # Stage 6: 权利要求书
-│   │   ├── specification_{专利标题}.md # Stage 7: 说明书
-│   │   └── abstract_{专利标题}.md      # Stage 7: 摘要
-├── prior art/                         # 查新检索结果
-└── project files/                     # 项目文件副本
+│   ├── {专利标题A}/
+│   │   ├── disclosure_{专利标题A}.md   # Stage 5: 独立交底书
+│   │   ├── flowcharts_{专利标题A}.md   # Stage 5: Mermaid附图
+│   │   ├── claims_{专利标题A}.md      # Stage 6: 权利要求书
+│   │   ├── specification_{专利标题A}.md # Stage 7: 说明书
+│   │   └── abstract_{专利标题A}.md     # Stage 7: 摘要
+│   ├── {专利标题B}/
+│   │   └── ...                        # （结构同上）
+├── prior art/                         # 查新检索结果原始数据
+└── project files/                     # Stage 1: 项目文件解析产物
 ```
 
 ## 脚本工具
