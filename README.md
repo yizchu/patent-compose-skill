@@ -8,7 +8,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Skill-blueviolet)](https://claude.com/product/claude-code)
 [![AI Powered](https://img.shields.io/badge/AI-Powered-green.svg)]()
-[![Principal Stages: 6](https://img.shields.io/badge/Principal%20Stages-6-important.svg)]()
+[![Principal Stages: 7](https://img.shields.io/badge/Principal%20Stages-7-important.svg)]()
 
 <br>
 
@@ -62,7 +62,7 @@ pip install -r requirements.txt
 
 # 3. 准备待分析的项目（包含源码/文档/设计稿等）
 
-# 4. 在IDE中调用技能，按提示完成6个阶段
+# 4. 在IDE中调用技能，按提示完成7个阶段
 ```
 
 #### 方式二：项目级部署（项目技能）
@@ -77,25 +77,27 @@ pip install -r requirements.txt
 patent-compose output/
 ├── materials/                          # 材料文件
 │   ├── disclosure-v1.md               # Stage 1: 原始技术交底书
-│   ├── claim-tree-v1.json             # Stage 1: 初始权利要求树
 │   ├── formula_inventory.md           # Stage 1: 公式清单
-│   ├── keyword-cn.json                # Stage 2: 中文检索词
-│   ├── keyword-en.json                # Stage 2: 英文检索词
-│   ├── prior-art.md                   # Stage 2: 相关技术清单
-│   ├── prior-art-report.md            # Stage 2: 查新分析报告
-│   ├── portfolio-initial.json         # Stage 3: 初始专利组合方案
-│   ├── portfolio-v2.json             # Stage 3: 优化后的专利组合
-│   └── disclosure-v2.md               # Stage 4: 汇总版最终交底书
-├── claim-optimization/                 # Stage 3: 博弈对抗记录
+│   ├── market-report.md               # Stage 2: 市场分析报告
+│   ├── claim-tree-v1.json             # Stage 2: 初版权利要求树
+│   ├── keyword-cn.json                # Stage 3: 中文检索词
+│   ├── keyword-en.json                # Stage 3: 英文检索词
+│   ├── prior-art.md                   # Stage 3: 相关技术清单
+│   ├── prior-art-report.md            # Stage 3: 查新分析报告
+│   ├── portfolio-initial.json         # Stage 4: 初始专利组合方案
+│   ├── portfolio-initial.md           # Stage 4: 初始专利组合方案的生成报告
+│   ├── portfolio-v2.json             # Stage 4: 优化后的专利组合
+│   └── disclosure-v2.md               # Stage 5: 汇总版最终交底书
+├── claim-optimization/                 # Stage 4: 博弈对抗记录
 │   ├── R1.json ~ R6.json              # 六轮攻防详情
 │   └── claim-optimization.html        # 优化过程可视化报告（HTML）
 ├── patents/                            # 各专利申请文件夹
 │   ├── {专利标题A}/
-│   │   ├── disclosure_{专利标题A}.md   # Stage 4: 独立交底书
-│   │   ├── flowcharts_{专利标题A}.md   # Stage 4: Mermaid流程图
-│   │   ├── claims_{专利标题A}.md      # Stage 5: 权利要求书
-│   │   ├── specification_{专利标题A}.md # Stage 6: 说明书
-│   │   └── abstract_{专利标题A}.md     # Stage 6: 摘要
+│   │   ├── disclosure_{专利标题A}.md   # Stage 5: 独立交底书
+│   │   ├── flowcharts_{专利标题A}.md   # Stage 5: Mermaid附图
+│   │   ├── claims_{专利标题A}.md      # Stage 6: 权利要求书
+│   │   ├── specification_{专利标题A}.md # Stage 7: 说明书
+│   │   └── abstract_{专利标题A}.md     # Stage 7: 摘要
 │   ├── {专利标题B}/
 │   │   └── ...                        # （结构同上）
 ├── prior art/                         # 查新检索结果原始数据
@@ -190,37 +192,60 @@ patent-compose output/
 
 | 阶段 | 权利要求树状态 | 核心动作 |
 |:-----|:-------------|:---------|
-| **Stage 1** | `claim-tree-v1.json`（初始版本） | 从项目文件中直接提取原始技术特征 |
-| **Stage 2** | 结合查新报告标注（特征级对比） | 标记哪些特征已被现有技术公开 |
-| **Stage 3** | `portfolio-v2.json`（优化后） | 划分权利要求树的一级模块（方法/系统）到不同的专利中，每个专利对应一棵优化后的权利要求树 |
-| **Stage 4** | `portfolio-v2.json`（优化后） | 基于优化后的专利组合和权利要求树，生成附图和最终交底书 |
-| **Stage 5** | `portfolio-v2.json`（优化后） | 基于优化后的专利组合和权利要求树，撰写最终权利要求书 |
-| **Stage 6** | `portfolio-v2.json`（优化后） | 基于优化后的专利组合和权利要求树，撰写说明书 |
+| **Stage 1** | - | 从项目文件中提取技术方案和潜在专利点 |
+| **Stage 2** | `claim-tree-v1.json`（初始版本） | 基于市场分析生成初版权利要求树 |
+| **Stage 3** | 结合查新报告标注（特征级对比） | 标记哪些特征已被现有技术公开 |
+| **Stage 4** | `portfolio-v2.json`（优化后） | 划分权利要求树的一级模块（方法/系统）到不同的专利中，每个专利对应一棵优化后的权利要求树 |
+| **Stage 5** | `portfolio-v2.json`（优化后） | 基于优化后的专利组合和权利要求树，生成附图和最终交底书 |
+| **Stage 6** | `portfolio-v2.json`（优化后） | 基于优化后的专利组合和权利要求树，撰写最终权利要求书 |
+| **Stage 7** | `portfolio-v2.json`（优化后） | 基于优化后的专利组合和权利要求树，撰写说明书 |
 ---
 
 ## 📋 主线工作流程
 
-### 🔍 Stage 1: 项目分析与权利要求树生成
+### 🔍 Stage 1: 项目分析
 
-**目标**：从项目文件中自动提取技术方案，构建初始权利要求树
+**目标**：从项目文件中自动提取技术方案和潜在专利点
 
 **核心能力**：
 - 📁 **多类型文件解析**：源代码（Python/Java/JS/Go等）、文档（MD/DOCX/PDF/PPT）、设计稿、配置文件
 - 🔍 **智能专利点识别**：自动识别核心算法、创新结构、独特设计
 - 🔒 **敏感信息过滤**：自动检测API Key、密码、内部IP等，保护安全
 - 📐 **公式提取与标准化**：识别数学公式，生成LaTeX格式和符号说明表
-- 🌳 **权利要求树构建**：层次化组织技术特征，对应权利要求书的撰写逻辑
 - 📚 **术语标准化**：采用国标术语 + IPC 标准词汇，拒绝自造词
 - 🔄 **双向映射**：建立"专利特征 ↔ 项目内容"对照表，可追溯
 
 **输出产物**：
 - `disclosure-v1.md` - 原始技术交底书
-- `claim-tree-v1.json` - 初始权利要求树（JSON格式）
 - `formula_inventory.md` - 公式清单
 
 ---
 
-### 🌐 Stage 2: 多源联合查新
+### 📊 Stage 2: 市场分析与初版权利要求树生成
+
+**目标**：基于项目分析结果，结合产品规划、竞品分析和未来市场需求预判，生成初版权利要求树
+
+**核心能力**：
+- 🎯 **双模式分析**：轻量级市场摸底（科研型专利） / 市场深度分析（产业化专利）
+- 🔍 **应用场景验证**：快速验证技术是否有实际应用场景，避免完全脱离实际
+- 📈 **竞品分析**：分析竞争对手的专利布局和技术路线
+- 🌳 **权利要求树构建**：基于"技术+市场"双维度筛选，生成初版权利要求树
+- 💡 **未来趋势预判**：预测3-5年市场需求的技术方向
+
+**两种分析模式**：
+
+| 模式 | 适用场景 | 分析重点 | 预计耗时 |
+|:-----|:---------|:---------|:---------|
+| **模式A：轻量级摸底** | 科研型专利，凸显创新型 | 快速验证技术应用场景 | 15-30分钟 |
+| **模式B：深度分析** | 产业化专利，有明确商用价值 | 全面需求分析、竞品专利布局、用户痛点 | 60-90分钟 |
+
+**输出产物**：
+- `market-report.md` - 市场分析报告（轻量版或深度版）
+- `claim-tree-v1.json` - 初版权利要求树（JSON格式）
+
+---
+
+### 🌐 Stage 3: 多源联合查新
 
 **目标**：通过国内外专利数据库全面检索现有技术，评估新颖性和创造性
 
@@ -253,7 +278,7 @@ AI分析权利要求树 → 生成中英文检索词 → 并行检索多个数�
 
 ---
 
-### ⚔️ Stage 3: 专利组合生成与六轮对抗优化
+### ⚔️ Stage 4: 专利组合生成与六轮对抗优化
 
 **目标**：并行多源数据库检索 + 补充网络检索 → 结构化三性评估报告
 
@@ -298,15 +323,16 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 
 **文件输出**：
 - `portfolio-initial.json`：初始专利组合方案
+- `portfolio-initial.md`：初始专利组合方案的生成报告（包含拆分策略和决策依据）
 - `portfolio-v2.json`：六轮对抗优化后的最终方案
 - `R1.json` ~ `R6.json`：每轮攻防详细记录
 - `claim-optimization.html`：可视化 HTML 页面
 
 ---
 
-### 📝 Stage 4: 交底书与流程图生成
+### 📝 Stage 5: 交底书与附图生成
 
-**目标**：为每件专利撰写完整的技术交底书，并绘制Mermaid流程图
+**目标**：为每件专利撰写完整的技术交底书，并绘制Mermaid附图
 
 **交底书结构**（符合中国专利撰写规范）：
 1. **发明名称** - 清楚简明反映主题
@@ -321,17 +347,17 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 10. **与现有技术的区别** - 基于查新报告的区别技术特征对比
 
 **附图**：
-- 使用 **Mermaid** 语法绘制流程图、架构图
+- 使用 **Mermaid** 语法绘制附图（包括流程图、架构图、示意图等）
 - 支持多种图表类型：flowchart, sequenceDiagram, classDiagram等
 
 **输出产物**：
 - `disclosure_{专利标题}.md` - 各专利独立交底书
-- `flowcharts_{专利标题}.md` - 各专利Mermaid流程图
+- `flowcharts_{专利标题}.md` - 各专利Mermaid附图
 - `disclosure-v2.md` - 汇总版最终交底书
 
 ---
 
-### 📋 Stage 5: 权利要求书生成
+### 📋 Stage 6: 权利要求书生成
 
 **目标**：基于优化后的权利要求树，自动生成符合规范的权利要求书
 
@@ -351,15 +377,15 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 
 ---
 
-### 📄 Stage 6: 完整专利申请文件生成
+### 📄 Stage 7: 完整专利申请文件生成
 
 **目标**：基于交底书、权利要求书和附图，生成说明书和摘要，形成**专利申请文件四件套**
 
 **四件套组成**：
-1. ✅ **权利要求书**（Stage 5已完成）
-2. ✅ **说明书**（Stage 6生成）- 包含技术领域、背景技术、发明内容、附图说明、具体实施方式
-3. ✅ **摘要**（Stage 6生成）- 简明扼要说明发明技术要点
-4. ✅ **附图**（Stage 4已完成）- Mermaid流程图
+1. ✅ **权利要求书**（Stage 6已完成）
+2. ✅ **说明书**（Stage 7生成）- 包含技术领域、背景技术、发明内容、附图说明、具体实施方式
+3. ✅ **摘要**（Stage 7生成）- 简明扼要说明发明技术要点
+4. ✅ **附图**（Stage 5已完成）- Mermaid附图
 
 **说明书撰写规范**：
 - **法定五部分**：技术领域、背景技术、发明内容、附图说明、具体实施方式
@@ -376,25 +402,25 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 
 <table width="100%" border="1" cellpadding="12" cellspacing="0">
 
-<!-- 第一组：Stage 1 + Stage 2 -->
+<!-- 第一组：Stage 2 + Stage 3 -->
 <tr>
-<th width="50%" align="center">Stage 1<br><sub>项目分析 → 权利要求树</sub></th>
-<th width="50%" align="center">Stage 2<br><sub>多源联合查新</sub></th>
+<th width="50%" align="center">Stage 2<br><sub>市场分析与初版权利要求树</sub></th>
+<th width="50%" align="center">Stage 3<br><sub>多源联合查新</sub></th>
 </tr>
 <tr>
 <td width="50%" valign="top" align="center">
-<img src="docs/assets/claim-tree-v1 效果图.png" alt="Stage 1: 初始权利要求树" width="100%" /><br>
+<img src="docs/assets/claim-tree-v1 效果图.png" alt="Stage 2: 初始权利要求树" width="100%" /><br>
 <sub>初始权利要求树（claim-tree-v1.json）</sub>
 </td>
 <td width="50%" valign="top" align="center">
-<img src="docs/assets/prior-art 效果图.png" alt="Stage 2: 查新汇总与标注" width="100%" /><br>
+<img src="docs/assets/prior-art 效果图.png" alt="Stage 3: 查新汇总与标注" width="100%" /><br>
 <sub>查新汇总与标注</sub>
 </td>
 </tr>
 
-<!-- 第二组：Stage 3 -->
+<!-- 第二组：Stage 4 -->
 <tr>
-<th width="100%" align="center" colspan="2">Stage 3<br><sub>六轮对抗 + 组合优化</sub></th>
+<th width="100%" align="center" colspan="2">Stage 4<br><sub>六轮对抗 + 组合优化</sub></th>
 </tr>
 <tr>
 <th width="50%" align="center">优化过程可视化</th>
@@ -402,18 +428,18 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 </tr>
 <tr>
 <td width="50%" valign="top" align="center">
-<img src="docs/assets/optimization-report 效果图.png" alt="Stage 3: 优化过程可视化" width="100%" /><br>
+<img src="docs/assets/optimization-report 效果图.png" alt="Stage 4: 优化过程可视化" width="100%" /><br>
 <sub>优化过程报告（claim-optimization.html）</sub>
 </td>
 <td width="50%" valign="top" align="center">
-<img src="docs/assets/portfolio-v2 效果图.png" alt="Stage 3: 最终专利组合及各专利权利要求树" width="100%" /><br>
+<img src="docs/assets/portfolio-v2 效果图.png" alt="Stage 4: 最终专利组合及各专利权利要求树" width="100%" /><br>
 <sub>专利组合方案（portfolio-v2.json）</sub>
 </td>
 </tr>
 
-<!-- 第三组：Stage 4 -->
+<!-- 第三组：Stage 5 -->
 <tr>
-<th width="100%" align="center" colspan="2">Stage 4<br><sub>交底书 + 附图</sub></th>
+<th width="100%" align="center" colspan="2">Stage 5<br><sub>交底书 + 附图</sub></th>
 </tr>
 <tr>
 <th width="50%" align="center">各专利交底书</th>
@@ -421,10 +447,10 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 </tr>
 <tr>
 <td width="50%" valign="top" align="center">
-<img src="docs/assets/专利disclosure 效果图.png" alt="Stage 4: 各专利独立交底书 & 汇总版交底书" width="100%" />
+<img src="docs/assets/专利disclosure 效果图.png" alt="Stage 5: 各专利独立交底书 & 汇总版交底书" width="100%" />
 </td>
 <td width="50%" valign="top" align="center">
-<img src="docs/assets/专利flowchart 效果图.png" alt="Stage 4: 各专利 Mermaid 流程图 & 汇总版流程图" width="100%" />
+<img src="docs/assets/专利flowchart 效果图.png" alt="Stage 5: 各专利 Mermaid 附图 & 汇总版附图" width="100%" />
 </td>
 </tr>
 </table>
@@ -458,12 +484,13 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 - [开发计划与进度](docs/TODO.md) - 功能路线图和待办事项
 
 ### 📝 各阶段详细说明
-- [Stage 1: 项目分析与初稿生成](prompts/stage1_analyze_project.md)
-- [Stage 2: 多源联合查新](prompts/stage2_prior_search.md)
-- [Stage 3: 专利布局与保护优化](prompts/stage3_design_portfolio.md)
-- [Stage 4: 交底书与流程图生成](prompts/stage4_generate_disclosure.md)
-- [Stage 5: 权利要求书生成](prompts/stage5_compose_claim.md)
-- [Stage 6: 完整申请文件生成](prompts/stage6_compose_application.md)
+- [Stage 1: 项目分析](prompts/stage1_analyze_project.md)
+- [Stage 2: 市场分析与初版权利要求树生成](prompts/stage2_analyze_market.md)
+- [Stage 3: 多源联合查新](prompts/stage3_prior_search.md)
+- [Stage 4: 专利组合生成与权利要求树优化](prompts/stage4_design_portfolio.md)
+- [Stage 5: 交底书与附图生成](prompts/stage5_generate_disclosure.md)
+- [Stage 6: 权利要求书撰写](prompts/stage6_compose_claim.md)
+- [Stage 7: 完整专利申请文件生成](prompts/stage7_compose_application.md)
 
 ---
 
