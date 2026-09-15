@@ -397,10 +397,10 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 
 <table width="100%" border="1" cellpadding="12" cellspacing="0">
 
-<!-- 第一组：Stage 2 + Stage 3 -->
+<!-- 第一组：Stage 1 + Stage 2 -->
 <tr>
-<th width="50%" align="center">Stage 2<br><sub>市场分析与初版权利要求树</sub></th>
-<th width="50%" align="center">Stage 3<br><sub>多源联合查新</sub></th>
+<th width="50%" align="center"><sub>初版权利要求树</sub></th>
+<th width="50%" align="center"><sub>多源联合查新</sub></th>
 </tr>
 <tr>
 <td width="50%" valign="top" align="center">
@@ -415,7 +415,7 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 
 <!-- 第二组：Stage 4 -->
 <tr>
-<th width="100%" align="center" colspan="2">Stage 4<br><sub>六轮对抗 + 组合优化</sub></th>
+<th width="100%" align="center" colspan="2"><sub>六轮对抗 + 组合优化</sub></th>
 </tr>
 <tr>
 <th width="50%" align="center">优化过程可视化</th>
@@ -434,7 +434,7 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 
 <!-- 第三组：Stage 5 -->
 <tr>
-<th width="100%" align="center" colspan="2">Stage 5<br><sub>交底书 + 附图</sub></th>
+<th width="100%" align="center" colspan="2"><sub>交底书 + 附图</sub></th>
 </tr>
 <tr>
 <th width="50%" align="center">各专利交底书</th>
