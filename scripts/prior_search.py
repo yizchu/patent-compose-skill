@@ -56,7 +56,7 @@ class PriorSearch:
         self.page = None
         self.kw_group = []
         self.patents = {}
-        self.keyword = None
+        self.keyword: str = None
 
     async def _init_page(self):
         await PriorSearch._init_shared()
@@ -77,11 +77,11 @@ class PriorSearch:
     async def search(self, keywords: list, **kwargs) -> bool:
         ...
 
-    async def search_round(self, kw_group):
+    async def search_round(self, kw_group, **kwargs):
         self.patents = {}
         self.kw_group = kw_group
         for keywords in kw_group:
-            if await self.search(keywords):
+            if await self.search(keywords, **kwargs):
                 break
         if len(self.patents) > 0:
             json_path = os.path.join(self.out_dir, clean_filename(self.keyword) + f".json")
@@ -336,7 +336,7 @@ class FpoSearch(PriorSearch):
         return False
 
 
-async def prior_search(project_root: str, home_only: bool = False):
+async def prior_search(project_root: str, home_only: bool = False, simplify: bool = False):
     if OUT_ROOT in project_root:
         if "prior art" in project_root:
             out_dir = project_root
@@ -355,6 +355,7 @@ async def prior_search(project_root: str, home_only: bool = False):
 
     try:
         await install_playwright_chromium()
+        cnki_kwargs = {"to_page": 3} if simplify else {}
         if not home_only:
             cnki_search = CnkiSearch(out_dir)
             fpo_search = FpoSearch(out_dir)
@@ -363,7 +364,7 @@ async def prior_search(project_root: str, home_only: bool = False):
             for i in range(max_len):
                 tasks = []
                 if i < len(keywords_cn):
-                    tasks.append(cnki_search.search_round(keywords_cn[i]))
+                    tasks.append(cnki_search.search_round(keywords_cn[i], **cnki_kwargs))
                 if i < len(keywords_en):
                     tasks.append(fpo_search.search_round(keywords_en[i]))
                 if tasks:
@@ -374,7 +375,7 @@ async def prior_search(project_root: str, home_only: bool = False):
             await cnki_search._init_page()
 
             for i in range(len(keywords_cn)):
-                await cnki_search.search_round(keywords_cn[i])
+                await cnki_search.search_round(keywords_cn[i], **cnki_kwargs)
             await cnki_search._cleanup()
         print("√ Done.")
     except Exception as e:
@@ -385,8 +386,9 @@ if __name__ == '__main__':
     args = argparse.ArgumentParser()
     args.add_argument("project_root", type=str, help="项目根目录")
     args.add_argument("--home_only", action="store_true", help="仅检索国内数据库")
+    args.add_argument("--simplify", action="store_true", help="简化模式：仅检索国内数据库前三页")
     args = args.parse_args()
     try:
-        asyncio.run(prior_search(args.project_root, args.home_only))
+        asyncio.run(prior_search(args.project_root, args.home_only, args.simplify))
     except Exception:
         sys.exit(0)

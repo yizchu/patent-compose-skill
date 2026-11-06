@@ -178,7 +178,7 @@ PII_PATTERNS = [
     re.compile(r'(?:身份证|身份证号|身份证号码|证件号)\s*[=:：]\s*\d{17}[\dXx]'),
     re.compile(r'(?:邮箱|电子邮箱|邮件地址)\s*[=:：]\s*[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'),
     re.compile(r'(?:手机|手机号|联系电话|联系方式|电话号码)\s*[=:：]\s*(?:\+?86)?1[3-9]\d{9}'),
-    re.compile(r'(?:银行卡|银行卡号|银行卡号码)\s*[=:：]\s*\d{16,19}'),
+    re.compile(r'(?:银行卡|银行卡号|银行卡号码|卡号|号码)\s*[=:：]\s*\d{16,19}'),
     re.compile(r'(?:护照|护照号|护照号码)\s*[=:：]\s*[A-Za-z0-9]{8,12}'),
 ]
 SENSITIVE_KEY_PATTERNS = [
@@ -192,6 +192,12 @@ SENSITIVE_KEY_PATTERNS = [
     re.compile(r'((?:密码|密钥|口令|凭证|令牌|鉴权码|私钥|公钥|证书|数据库密码|数据库密钥|访问密钥)[\s:=：]+)["\']?([^\s"\']{8,})["\']?'),
     # 匹配无分隔符的中文密钥格式 (密码xxx)，排除后面跟中文字符的情况（如"密码学"、"密码保护"）
     re.compile(r'((?:密码|密钥|口令|凭证|令牌|鉴权码|私钥|公钥|证书|数据库密码|数据库密钥|访问密钥))(?![\u4e00-\u9fa5\s:=：])["\']?([A-Za-z0-9+/=_-]{8,})["\']?'),
+    # 敏感键名后面跟随短字符串值（6-16位）
+    re.compile(r'''(['"]?)(?:password|passwd|pwd|secret|api_key|apikey|token|auth|credential|private_key|privatekey|access_key|accesskey|client_secret|admin_key|adminkey)['"]?(?:\s*[:=]\s*|\s+)(?<![\w/+=])['"]?([A-Za-z0-9+/=_\-]{6,16})(?![\w/+=])['"]?''', re.IGNORECASE),
+    # 主机地址
+    re.compile(r'''(['"]?)(?:host|server|addr)['"]?(?:\s*[:=]\s*|\s+)(?<![\w])['"]?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})['"]?''', re.IGNORECASE),
+    # 带后缀的密钥变量名（如 ADMIN_KEY = "xxx"）
+    re.compile(r'''([A-Z][A-Z0-9_]*(?:_?KEY|_?SECRET|_?TOKEN|_?PASSWORD|_?CREDENTIAL))\s*(?:=\s*|:?\s*)["']([A-Za-z0-9+/=_\-]{6,16})["']'''),
 ]
 
 def to_json(data: dict, file_path: str):
@@ -292,11 +298,12 @@ def content_remove_sensitive(content: str) -> str:
 # 文件文本和图片提取器
 # ============================================================
 class FileReader:
-    def __init__(self, file_path: str, extension: str, out_dir: str):
+    def __init__(self, file_path: str, extension: str, out_dir: str | None = None):
         self.file_path = file_path
         self.extension = extension.replace(".", "")
         self.out_dir = out_dir
-        os.makedirs(self.out_dir, exist_ok=True)
+        if self.out_dir is not None and not os.path.exists(self.out_dir):
+            os.makedirs(self.out_dir, exist_ok=True)
 
     def read_texts(self) -> str:
         """读取文件的文本内容，去除敏感信息"""
@@ -311,16 +318,18 @@ class FileReader:
             text_output = self.get_jupyter_text()
         if text_output is not None:
             text_output = content_remove_sensitive(text_output)
-            with open(os.path.join(self.out_dir, "content.md"), 'w', encoding='utf-8', errors='ignore') as f:
-                f.write(text_output)
+            if self.out_dir is not None:
+                with open(os.path.join(self.out_dir, "content.md"), 'w', encoding='utf-8', errors='ignore') as f:
+                    f.write(text_output)
             return text_output
         else:
             for encoding in ['utf-8', 'utf-8-sig', 'gbk', 'gb2312', 'latin-1']:
                 try:
                     with open(self.file_path, 'r', encoding=encoding, errors='ignore') as f_input:
                         text_output = content_remove_sensitive(f_input.read())
-                    with open(os.path.join(self.out_dir, "content.md"), 'w', encoding=encoding, errors='ignore') as f_output:
-                        f_output.write(text_output)
+                    if self.out_dir is not None:
+                        with open(os.path.join(self.out_dir, "content.md"), 'w', encoding=encoding, errors='ignore') as f_output:
+                            f_output.write(text_output)
                     return text_output
                 except:
                     pass
@@ -438,10 +447,10 @@ class FileReader:
             for slide in presentation.slides:
                 for shape in slide.shapes:
                     try:
-                        if "image" in shape.image.content_type:
+                        if "image" in shape.image.content_type and self.out_dir is not None:
                             with open(os.path.join(self.out_dir, f"image{image_cnt}.{shape.image.ext}"), 'wb') as f:
                                 f.write(shape.image.blob)
-                            image_cnt += 1
+                        image_cnt += 1
                     except:
                         pass
 
@@ -480,7 +489,7 @@ class FileReader:
                 with zipfile.ZipFile(temp_docx, 'r') as z:
                     for item in z.namelist():
                         try:
-                            if item.startswith('word/media/'):
+                            if item.startswith('word/media/') and self.out_dir is not None:
                                 with open(os.path.join(self.out_dir, os.path.basename(item)), 'wb') as f:
                                     f.write(z.read(item))
                         except:
@@ -499,7 +508,7 @@ class FileReader:
             with zipfile.ZipFile(self.file_path, 'r') as z:
                 for item in z.namelist():
                     try:
-                        if item.startswith('word/media/'):
+                        if item.startswith('word/media/') and self.out_dir is not None:
                             with open(os.path.join(self.out_dir, os.path.basename(item)), 'wb') as f:
                                 f.write(z.read(item))
                     except:
@@ -529,8 +538,9 @@ class FileReader:
                     base_image = doc.extract_image(xref)
                     image_path = os.path.join(self.out_dir, f"image{image_cnt}.{base_image['ext']}")
                     image_cnt += 1
-                    with open(image_path, "wb") as f:
-                        f.write(base_image["image"])
+                    if self.out_dir is not None:
+                        with open(image_path, "wb") as f:
+                            f.write(base_image["image"])
                 except:
                     pass
         doc.close()
@@ -571,9 +581,10 @@ class FileReader:
                                 png_data = base64.b64decode(data['image/png'])
                                 image_path = os.path.join(self.out_dir, f"cell{i+1}_image{image_cnt}.png")
                                 image_cnt += 1
-                                with open(image_path, 'wb') as f:
-                                    f.write(png_data)
-                            if 'image/jpeg' in data:
+                                if self.out_dir is not None:
+                                    with open(image_path, 'wb') as f:
+                                        f.write(png_data)
+                            if 'image/jpeg' in data and self.out_dir is not None:
                                 jpeg_data = base64.b64decode(data['image/jpeg'])
                                 image_path = os.path.join(self.out_dir, f"cell{i+1}_image{image_cnt}.jpg")
                                 image_cnt += 1
@@ -604,9 +615,39 @@ def cli_from_json():
         sys.exit(1)
 
 
+def cli_read_text():
+    """命令行接口：读取并打印文件内容"""
+    if len(sys.argv) < 3:
+        print("用法: python file_tools.py read_text <file_path>", file=sys.stderr)
+        print("支持格式: docx, pdf, pptx, md, txt 等", file=sys.stderr)
+        sys.exit(1)
+
+    file_path = sys.argv[2]
+
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"文件不存在: {file_path}")
+
+    try:
+        file_extension = os.path.splitext(file_path)[1].replace(".", "").lower()
+        file_reader = FileReader(file_path, file_extension)
+        text = file_reader.read_texts()
+        if text:
+            print(text)
+        else:
+            print(f"⚠️ 未能从文件中提取到文本内容: {file_path}", file=sys.stderr)
+            sys.exit(1)
+    except Exception as e:
+        print(f"❌ 读取文件失败: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1] == 'from_json':
         cli_from_json()
+    elif len(sys.argv) > 1 and sys.argv[1] == 'read_text':
+        cli_read_text()
     else:
-        print("用法: python file_tools.py from_json <file_path>")
+        print("可用命令:")
+        print("  python file_tools.py from_json <file_path>  - 验证JSON格式")
+        print("  python file_tools.py read_text <file_path>  - 读取文件文本内容")
         sys.exit(1)
