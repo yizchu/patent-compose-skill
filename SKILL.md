@@ -1,12 +1,12 @@
 ---
 name: patent-compose-skill
-description: AI驱动的专利撰写工作流，自动化完成项目分析、查新检索、专利组合生成与保护优化、交底书和附图生成、权利要求书及完整申请文件生成。
+description: AI驱动的专利撰写工作流，自动化完成项目分析、查新检索、专利组合生成与保护优化、交底书和附图生成、权利要求书及完整申请文件生成、审查答复预演。
 user-invocable: true
 allowed-tools: Read, Write, Edit, Grep, Glob, WebSearch, RunCommand
 ---
 
 ## 概述
-本 Skill 用于辅助完成专利撰写全流程，包含**七个阶段**：项目分析、市场分析、项目成果查新、专利组合生成与权利要求树优化、交底书与附图生成、权利要求书撰写、完整专利申请文件（说明书+摘要）生成。
+本 Skill 用于辅助完成专利撰写全流程，包含**八个阶段**：项目分析、市场分析、项目成果查新、专利组合生成与权利要求树优化、交底书与附图生成、权利要求书撰写、完整专利申请文件（说明书+摘要）生成、审查答复预演。
 
 ## 核心原则
 - **固定输出目录**：专利项目根目录下的 `patent-compose output`。不要默认写到其他任何目录。
@@ -97,6 +97,19 @@ allowed-tools: Read, Write, Edit, Grep, Glob, WebSearch, RunCommand
 - `patents/specification_{专利标题}.md` - 各专利独立的说明书
 - `patents/abstract_{专利标题}.md` - 各专利独立的摘要
 
+### Stage 8: 审查答复预演
+
+**`Read`** `${SKILL_DIR}/prompts/stage8_office_action_rehearsal.md`
+
+**功能**：模拟审查员对申请文件四件套逐轮出具审查意见，再以代理师视角完成意见陈述与修改，输出授权前景评估、答复策略与预演修改稿
+
+⚠️ 本阶段为可选阶段，正式提交申请文件前建议执行
+
+**输出**：
+- `office-action-rehearsal/R1-R6.json` - 六轮审查意见与答复记录
+- `materials/office-action-rehearsal-report.md` - 审查答复预演报告
+- `materials/amendment-draft.md` - 预演修改稿与修改对照表
+
 ## 输出目录结构
 
 ```
@@ -113,7 +126,9 @@ patent-compose output/
 │   ├── portfolio-initial.json         # Stage 4: 初始专利组合方案
 │   ├── portfolio-initial.md           # Stage 4: 初始专利组合方案的生成报告
 │   ├── portfolio-v2.json             # Stage 4: 优化后的专利组合
-│   └── disclosure-v2.md               # Stage 5: 汇总版最终交底书
+│   ├── disclosure-v2.md               # Stage 5: 汇总版最终交底书
+│   ├── office-action-rehearsal-report.md # Stage 8: 审查答复预演报告
+│   └── amendment-draft.md             # Stage 8: 预演修改稿与修改对照表
 ├── claim-optimization/                 # Stage 4: 博弈对抗记录
 │   ├── R1.json ~ R6.json              # 六轮攻防详情
 │   └── claim-optimization.html        # 优化过程可视化报告（HTML）
@@ -126,6 +141,8 @@ patent-compose output/
 │   │   └── abstract_{专利标题A}.md     # Stage 7: 摘要
 │   ├── {专利标题B}/
 │   │   └── ...                        # （结构同上）
+├── office-action-rehearsal/            # Stage 8: 审查答复预演记录
+│   └── R1.json ~ R6.json              # 六轮审查意见与答复详情
 ├── prior art/                         # 查新检索结果原始数据
 └── project files/                     # Stage 1: 项目文件解析产物
 ```
@@ -141,4 +158,3 @@ patent-compose output/
 | `yaml_to_json.py` | YAML格式转换为JSON（用于生成JSON文件） |  |
 | `file_tools.py` | 文件读写、JSON 格式验证与自动修复 | 通用工具 |
 | `config.py` | 全局配置（输出目录、缩进等） | 通用配置 |
-| `network_tools.py` | 网络请求工具 | 通用工具 |

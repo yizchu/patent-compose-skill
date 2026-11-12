@@ -8,7 +8,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Skill-blueviolet)](https://claude.com/product/claude-code)
 [![AI Powered](https://img.shields.io/badge/AI-Powered-green.svg)]()
-[![Principal Stages: 7](https://img.shields.io/badge/Principal%20Stages-7-important.svg)]()
+[![Principal Stages: 8](https://img.shields.io/badge/Principal%20Stages-8-important.svg)]()
 
 <br>
 
@@ -57,7 +57,7 @@ pip install -r requirements.txt
 
 # 3. 准备待分析的项目（包含源码/文档/设计稿等）
 
-# 4. 在IDE中调用技能，按提示完成7个阶段，也可以任选一个阶段开始
+# 4. 在IDE中调用技能，按提示完成8个阶段，也可以任选一个阶段开始
 ```
 
 #### 方式二：项目级部署（项目技能）
@@ -82,7 +82,9 @@ patent-compose output/
 │   ├── portfolio-initial.json         # Stage 4: 初始专利组合方案
 │   ├── portfolio-initial.md           # Stage 4: 初始专利组合方案的生成报告
 │   ├── portfolio-v2.json             # Stage 4: 优化后的专利组合
-│   └── disclosure-v2.md               # Stage 5: 汇总版最终交底书
+│   ├── disclosure-v2.md               # Stage 5: 汇总版最终交底书
+│   ├── office-action-rehearsal-report.md # Stage 8: 审查答复预演报告
+│   └── amendment-draft.md             # Stage 8: 预演修改稿与修改对照表
 ├── claim-optimization/                 # Stage 4: 博弈对抗记录
 │   ├── R1.json ~ R6.json              # 六轮攻防详情
 │   └── claim-optimization.html        # 优化过程可视化报告（HTML）
@@ -95,6 +97,8 @@ patent-compose output/
 │   │   └── abstract_{专利标题A}.md     # Stage 7: 摘要
 │   ├── {专利标题B}/
 │   │   └── ...                        # （结构同上）
+├── office-action-rehearsal/            # Stage 8: 审查答复预演记录
+│   └── R1.json ~ R6.json              # 六轮审查意见与答复详情
 ├── prior art/                         # 查新检索结果原始数据
 └── project files/                     # Stage 1: 项目文件解析产物
 ```
@@ -194,6 +198,8 @@ patent-compose output/
 | **Stage 5** | `portfolio-v2.json`（优化后） | 基于优化后的专利组合和权利要求树，生成附图和最终交底书 |
 | **Stage 6** | `portfolio-v2.json`（优化后） | 基于优化后的专利组合和权利要求树，撰写最终权利要求书 |
 | **Stage 7** | `portfolio-v2.json`（优化后） | 基于优化后的专利组合和权利要求树，撰写说明书 |
+| **Stage 8** | `portfolio-v2.json`（结构不变） | 以审查员视角检验已成稿申请文件的授权前景，不重写权利要求树，修改建议只落在 `amendment-draft.md` |
+
 ---
 
 ## 📋 主线工作流程
@@ -393,6 +399,32 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 
 ---
 
+### 🛡️ Stage 8: 审查答复预演（可选）
+
+**目标**：以审查员视角检验已成稿申请文件的授权前景，在正式提交前暴露驳回风险
+
+**与 Stage 4 的区别**：Stage 4 在成稿前从竞争对手规避视角优化专利组合，本阶段在成稿后从审查员驳回视角检验授权前景，视角、法律依据与产出均不相同
+
+**六轮预演**：
+
+| 轮次 | 审查角色 | 主要法律依据 | 代理师应对重点 |
+|:-----|:---------|:-------------|:---------------|
+| R1 | 客体与形式审查 | 专利法第2条第2款、第5条、第25条、第26条第4款、第31条第1款 | 修正不清楚表述，拆分不符合单一性的权利要求 |
+| R2 | 新颖性审查 | 专利法第22条第2款 | 提取区别技术特征，限缩独立权利要求 |
+| R3 | 创造性审查 | 专利法第22条第3款（三步法） | 论证非显而易见性，补充技术效果依据 |
+| R4 | 公开充分与支持审查 | 专利法第26条第3款、第26条第4款 | 从说明书原有记载补入依据，调整概括层次 |
+| R5 | 修改超范围审查 | 专利法第33条 | 逐处核对原始记载依据，回退无依据的修改 |
+| R6 | 授权前景与策略审计 | 综合上述条款 | 输出授权概率、答复优先级、分案预案 |
+
+**输出产物**：
+- `office-action-rehearsal/R1-R6.json` - 六轮审查意见与答复记录
+- `materials/office-action-rehearsal-report.md` - 预演报告（授权概率、修改建议对照、风险清单）
+- `materials/amendment-draft.md` - 预演修改稿与逐处修改对照表
+
+⚠️ **可选阶段**：正式提交申请文件前、或收到真实审查意见通知书后自检答复思路时执行
+
+---
+
 ## 🎨 运行效果
 
 <table width="100%" border="1" cellpadding="12" cellspacing="0">
@@ -458,8 +490,6 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 
 **所有开发任务、优先级、状态和详细信息请查看：[Todo List](docs/TODO.md)**
 
-</div>
-
 ### 适用场景
 
 | 场景 | 典型需求 | 触发示例 | 核心价值 |
@@ -486,6 +516,7 @@ Step 1: 读取查新报告 → Step 2: 生成初始专利组合
 - [Stage 5: 交底书与附图生成](prompts/stage5_generate_disclosure.md)
 - [Stage 6: 权利要求书撰写](prompts/stage6_compose_claim.md)
 - [Stage 7: 完整专利申请文件生成](prompts/stage7_compose_application.md)
+- [Stage 8: 审查答复预演](prompts/stage8_office_action_rehearsal.md)
 
 ---
 
