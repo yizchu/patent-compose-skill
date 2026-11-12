@@ -590,7 +590,7 @@ python "${SKILL_DIR}/scripts/generate_optimization_html.py" <项目根目录>
 
 生成权利要求树后，必须执行以下命令检查权利要求树的格式是否符合规范：
 ```bash
-python "${SKILL_DIR}/scripts/claim.py" tree_to_claims "${输出目录}/materials/claim-tree-v1.json"
+python "${SKILL_DIR}/scripts/claim.py" tree_to_claims "${输出目录}/materials/portfolio-v2.json"
 ```
 若程序报错，需在保持权利要求树内容不变的情况下调整其结构，再执行上述检查命令，**循环此过程直到权利要求树格式符合核心原则为止**。
 
